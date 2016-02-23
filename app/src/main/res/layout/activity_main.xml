@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:orientation="vertical"
+             android:paddingLeft="@dimen/activity_horizontal_margin"
+             android:paddingRight="@dimen/activity_horizontal_margin"
+             android:paddingTop="@dimen/activity_vertical_margin"
+             android:paddingBottom="@dimen/activity_vertical_margin"
+             android:background="@android:color/black"
+             tools:context="com.github.piasy.rxandroidaudio.example.MainActivity"
+        >
+
+    <Button
+            android:id="@+id/mBtnPlay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="play"
+            />
+
+    <TextView
+            android:id="@+id/mTvLog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:textColor="@android:color/white"
+            tools:text="added"
+            />
+
+    <FrameLayout
+            android:id="@+id/mFlIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/iv_voice_input_logo"
+            android:visibility="gone"
+            tools:visibility="visible"
+            >
+
+        <TextView
+                android:id="@+id/mTvRecordingHint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#504B2D"
+                android:textSize="13sp"
+                android:layout_gravity="center_horizontal|bottom"
+                android:layout_marginBottom="39dp"
+                tools:text="@string/voice_msg_input_hint_speaking"
+                />
+
+        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="40dp"
+                android:orientation="vertical"
+                android:layout_gravity="right"
+                android:layout_marginTop="35dp"
+                >
+
+            <ImageView
+                    android:id="@+id/mIvVoiceIndicator7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/voice_indicator_7"
+                    android:visibility="invisible"
+                    tools:visibility="visible"
+                    />
+
+            <ImageView
+                    android:id="@+id/mIvVoiceIndicator6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/voice_indicator_6"
+                    android:visibility="invisible"
+                    tools:visibility="visible"
+                    />
+
+            <ImageView
+                    android:id="@+id/mIvVoiceIndicator5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/voice_indicator_5"
+                    android:visibility="invisible"
+                    tools:visibility="visible"
+                    />
+
+            <ImageView
+                    android:id="@+id/mIvVoiceIndicator4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/voice_indicator_4"
+                    android:visibility="invisible"
+                    tools:visibility="visible"
+                    />
+
+            <ImageView
+                    android:id="@+id/mIvVoiceIndicator3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/voice_indicator_3"
+                    android:visibility="invisible"
+                    tools:visibility="visible"
+                    />
+
+            <ImageView
+                    android:id="@+id/mIvVoiceIndicator2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/voice_indicator_2"
+                    android:visibility="invisible"
+                    tools:visibility="visible"
+                    />
+
+            <ImageView
+                    android:id="@+id/mIvVoiceIndicator1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/voice_indicator_1"
+                    android:visibility="invisible"
+                    tools:visibility="visible"
+                    />
+        </LinearLayout>
+    </FrameLayout>
+
+    <TextView
+            android:id="@+id/mTvPressToSay"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="20dp"
+            android:gravity="center"
+            android:text="Press to speak"
+            android:textSize="16sp"
+            android:textColor="#333333"
+            android:background="@drawable/button_press_to_say_bg"
+            />
+
+</FrameLayout>
