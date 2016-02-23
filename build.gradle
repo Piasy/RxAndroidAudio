@@ -17,6 +17,7 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
+        maven { url "http://dl.bintray.com/tbruyelle/tbruyelle" }
     }
 }
 
@@ -26,6 +27,9 @@ task clean(type: Delete) {
 
 ext {
     groupName = 'com.github.piasy'
+    artifactName = 'RxAndroidAudio'
+    artifactDescription = 'Android Audio encapsulation library, with part Rx support.'
+    artifactLabels = ['rx', 'android', 'audio']
     releaseVersionCode = 1
     releaseVersionName = '1.0.0'
 

@@ -1,9 +1,9 @@
 package com.github.piasy.rxandroidaudio.example;
 
+import android.Manifest;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,6 +17,8 @@ import butterknife.OnClick;
 import com.github.piasy.rxandroidaudio.AudioRecorder;
 import com.github.piasy.rxandroidaudio.RxAmplitude;
 import com.github.piasy.rxandroidaudio.RxAudioPlayer;
+import com.tbruyelle.rxpermissions.RxPermissions;
+import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -30,10 +32,11 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity implements AudioRecorder.OnErrorListener {
+public class MainActivity extends RxAppCompatActivity implements AudioRecorder.OnErrorListener {
 
     private static final String TAG = "MainActivity";
     public static final int MIN_AUDIO_LENGTH_SECONDS = 2;
+    public static final int SHOW_INDICATOR_DELAY_MILLIS = 300;
 
     @Bind(R.id.mFlIndicator)
     FrameLayout mFlIndicator;
@@ -96,6 +99,31 @@ public class MainActivity extends AppCompatActivity implements AudioRecorder.OnE
         mTvPressToSay.setBackgroundResource(R.drawable.button_press_to_say_pressed_bg);
         mTvRecordingHint.setText(R.string.voice_msg_input_hint_speaking);
 
+        boolean isPermissionsGranted = RxPermissions.getInstance(getApplicationContext())
+                .isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE) &&
+                RxPermissions.getInstance(getApplicationContext())
+                        .isGranted(Manifest.permission.RECORD_AUDIO);
+        if (!isPermissionsGranted) {
+            RxPermissions.getInstance(getApplicationContext())
+                    .request(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.RECORD_AUDIO)
+                    .subscribe(new Action1<Boolean>() {
+                        @Override
+                        public void call(Boolean aBoolean) {
+                            // not record first time to request permission
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            throwable.printStackTrace();
+                        }
+                    });
+        } else {
+            recordAfterPermissionGranted();
+        }
+    }
+
+    private void recordAfterPermissionGranted() {
         mRecordSubscription = Single.just(true)
                 .subscribeOn(Schedulers.io())
                 .flatMap(new Func1<Boolean, Single<Boolean>>() {
@@ -147,12 +175,13 @@ public class MainActivity extends AppCompatActivity implements AudioRecorder.OnE
                 .map(new Func1<Boolean, Boolean>() {
                     @Override
                     public Boolean call(Boolean aBoolean) {
-                        mFlIndicator.post(new Runnable() {
+                        // TODO why need delay?
+                        mFlIndicator.postDelayed(new Runnable() {
                             @Override
                             public void run() {
                                 mFlIndicator.setVisibility(View.VISIBLE);
                             }
-                        });
+                        }, SHOW_INDICATOR_DELAY_MILLIS);
                         return mAudioRecorder.startRecord();
                     }
                 })
@@ -170,6 +199,7 @@ public class MainActivity extends AppCompatActivity implements AudioRecorder.OnE
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread())
+                .compose(this.<Integer>bindToLifecycle())
                 .subscribe(new Action1<Integer>() {
                     @Override
                     public void call(Integer level) {
@@ -204,39 +234,44 @@ public class MainActivity extends AppCompatActivity implements AudioRecorder.OnE
             mRecordSubscription = null;
         }
 
-        Single.just(true).subscribeOn(Schedulers.io()).map(new Func1<Boolean, Boolean>() {
-            @Override
-            public Boolean call(Boolean aBoolean) {
-                int seconds = mAudioRecorder.stopRecord();
-                if (seconds >= MIN_AUDIO_LENGTH_SECONDS) {
-                    mAudioFiles.offer(mAudioFile);
-                    return true;
-                }
-                return false;
-            }
-        }).doOnSuccess(new Action1<Boolean>() {
-            @Override
-            public void call(Boolean aBoolean) {
-                Log.d(TAG, "to play audio_record_end: " + R.raw.audio_record_end);
-                mRxAudioPlayer.play(getApplicationContext(), R.raw.audio_record_end)
-                        .toBlocking()
-                        .value();
-                Log.d(TAG, "audio_record_end play finished");
-            }
-        }).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Boolean>() {
-            @Override
-            public void call(Boolean added) {
-                if (added) {
-                    mTvLog.setText(mTvLog.getText() + "\n" + "audio file " + mAudioFile.getName() +
-                            " added");
-                }
-            }
-        }, new Action1<Throwable>() {
-            @Override
-            public void call(Throwable throwable) {
-                throwable.printStackTrace();
-            }
-        });
+        Log.d(TAG, "to play audio_record_end: " + R.raw.audio_record_end);
+        mRxAudioPlayer.play(getApplicationContext(), R.raw.audio_record_end)
+                .doOnSuccess(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        Log.d(TAG, "audio_record_end play finished");
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .map(new Func1<Boolean, Boolean>() {
+                    @Override
+                    public Boolean call(Boolean aBoolean) {
+                        int seconds = mAudioRecorder.stopRecord();
+                        if (seconds >= MIN_AUDIO_LENGTH_SECONDS) {
+                            mAudioFiles.offer(mAudioFile);
+                            return true;
+                        }
+                        return false;
+                    }
+                })
+                .toObservable()
+                .observeOn(AndroidSchedulers.mainThread())
+                .compose(this.<Boolean>bindToLifecycle())
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean added) {
+                        if (added) {
+                            mTvLog.setText(
+                                    mTvLog.getText() + "\n" + "audio file " + mAudioFile.getName() +
+                                            " added");
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
+                });
     }
 
     List<ImageView> mIvVoiceIndicators;
@@ -265,6 +300,7 @@ public class MainActivity extends AppCompatActivity implements AudioRecorder.OnE
 
     @OnClick(R.id.mBtnPlay)
     public void startPlay() {
+        mTvLog.setText("");
         if (!mAudioFiles.isEmpty()) {
             File audioFile = mAudioFiles.poll();
             mRxAudioPlayer.play(audioFile)

@@ -46,6 +46,8 @@ import java.io.IOException;
 public final class AudioRecorder {
     private static final String TAG = "AudioRecorder";
 
+    private static final int STOP_AUDIO_RECORD_DELAY_MILLIS = 300;
+
     private AudioRecorder() {
         // singleton
     }
@@ -216,11 +218,16 @@ public final class AudioRecorder {
         switch (mState) {
             case STATE_RECORDING:
                 try {
+                    // TODO why need delay?
+                    Thread.sleep(STOP_AUDIO_RECORD_DELAY_MILLIS);
                     mRecorder.stop();
                     length = (int) ((System.currentTimeMillis() - mSampleStart) / 1000);
                 } catch (RuntimeException e) {
                     Log.w(TAG, "stopRecord fail, stop fail(no audio data recorded): " +
                             e.getMessage());
+                } catch (InterruptedException e) {
+                    Log.w(TAG,
+                            "stopRecord fail, stop fail(InterruptedException): " + e.getMessage());
                 }
                 // fall down
             case STATE_PREPARED:
