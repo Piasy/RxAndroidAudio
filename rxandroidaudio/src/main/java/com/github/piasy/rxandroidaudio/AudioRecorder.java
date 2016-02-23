@@ -47,6 +47,8 @@ public final class AudioRecorder {
     private static final String TAG = "AudioRecorder";
 
     private static final int STOP_AUDIO_RECORD_DELAY_MILLIS = 300;
+    public static final int DEFAULT_SAMPLE_RATE = 8000;
+    public static final int DEFAULT_BIT_RATE = 16000;
 
     private AudioRecorder() {
         // singleton
@@ -149,16 +151,28 @@ public final class AudioRecorder {
     }
 
     /**
-     * prepare for a new audio record.
+     * prepare for a new audio record, with default sample rate and bit rate.
      */
     @WorkerThread
     public synchronized boolean prepareRecord(int audioSource, int outputFormat, int audioEncoder,
             File outputFile) {
+        return prepareRecord(audioSource, outputFormat, audioEncoder, DEFAULT_SAMPLE_RATE,
+                DEFAULT_BIT_RATE, outputFile);
+    }
+
+    /**
+     * prepare for a new audio record.
+     */
+    @WorkerThread
+    public synchronized boolean prepareRecord(int audioSource, int outputFormat, int audioEncoder,
+            int sampleRate, int bitRate, File outputFile) {
         stopRecord();
 
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(audioSource);
         mRecorder.setOutputFormat(outputFormat);
+        mRecorder.setAudioSamplingRate(sampleRate);
+        mRecorder.setAudioEncodingBitRate(bitRate);
         mRecorder.setAudioEncoder(audioEncoder);
         mRecorder.setOutputFile(outputFile.getAbsolutePath());
 
@@ -218,7 +232,8 @@ public final class AudioRecorder {
         switch (mState) {
             case STATE_RECORDING:
                 try {
-                    // TODO why need delay?
+                    // seems to be a bug in Android's AAC based audio encoders
+                    // ref: http://stackoverflow.com/a/24092524/3077508
                     Thread.sleep(STOP_AUDIO_RECORD_DELAY_MILLIS);
                     mRecorder.stop();
                     length = (int) ((System.currentTimeMillis() - mSampleStart) / 1000);
