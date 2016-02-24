@@ -28,6 +28,7 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.support.annotation.NonNull;
 import android.support.annotation.RawRes;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 import java.io.File;
 import java.io.IOException;
@@ -60,7 +61,7 @@ public final class RxAudioPlayer {
 
     /**
      * play audio from raw resource. should be scheduled in IO thread.
-     * */
+     */
     public Single<Boolean> play(final Context context, @RawRes final int audioRes) {
         return Single.create(new Single.OnSubscribe<Boolean>() {
             @Override
@@ -117,7 +118,7 @@ public final class RxAudioPlayer {
 
     /**
      * play audio from local file. should be scheduled in IO thread.
-     * */
+     */
     public Single<Boolean> play(@NonNull final File audioFile) {
         return Single.create(new Single.OnSubscribe<Boolean>() {
             @Override
@@ -132,11 +133,23 @@ public final class RxAudioPlayer {
                         @Override
                         public void onCompletion(MediaPlayer mp) {
                             Log.d(TAG, "OnCompletionListener::onCompletion");
-                            singleSubscriber.onSuccess(true);
 
-                            // could not call, otherwise the second sound could not play, thus no
-                            // complete notification
-                            stopPlay();
+                            // could not call stopPlay immediately, otherwise the second sound
+                            // could not play, thus no complete notification
+                            // TODO discover why?
+                            Observable.timer(50, TimeUnit.MILLISECONDS)
+                                    .subscribe(new Action1<Long>() {
+                                        @Override
+                                        public void call(Long aLong) {
+                                            stopPlay();
+                                            singleSubscriber.onSuccess(true);
+                                        }
+                                    }, new Action1<Throwable>() {
+                                        @Override
+                                        public void call(Throwable throwable) {
+                                            singleSubscriber.onError(throwable);
+                                        }
+                                    });
                         }
                     });
                     mPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
@@ -162,6 +175,119 @@ public final class RxAudioPlayer {
         });
     }
 
+    /**
+     * Non reactive API.
+     * */
+    @WorkerThread
+    public boolean playNonRxy(@NonNull final File audioFile,
+            final MediaPlayer.OnCompletionListener onCompletionListener,
+            final MediaPlayer.OnErrorListener onErrorListener) {
+        stopPlay();
+
+        Log.d(TAG, "MediaPlayer to start play: " + audioFile.getName());
+        mPlayer = new MediaPlayer();
+        try {
+            mPlayer.setDataSource(audioFile.getAbsolutePath());
+            mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(final MediaPlayer mp) {
+                    Log.d(TAG, "OnCompletionListener::onCompletion");
+
+                    // could not call stopPlay immediately, otherwise the second sound
+                    // could not play, thus no complete notification
+                    // TODO discover why?
+                    Observable.timer(50, TimeUnit.MILLISECONDS)
+                            .subscribe(new Action1<Long>() {
+                                @Override
+                                public void call(Long aLong) {
+                                    stopPlay();
+                                    onCompletionListener.onCompletion(mp);
+                                }
+                            }, new Action1<Throwable>() {
+                                @Override
+                                public void call(Throwable throwable) {
+                                    Log.d(TAG, "OnCompletionListener::onError, " +
+                                            throwable.getMessage());
+                                }
+                            });
+                }
+            });
+            mPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                @Override
+                public boolean onError(MediaPlayer mp, int what, int extra) {
+                    Log.d(TAG, "OnErrorListener::onError" + what + ", " + extra);
+                    onErrorListener.onError(mp, what, extra);
+                    stopPlay();
+                    return true;
+                }
+            });
+            mPlayer.setVolume(1.0F, 1.0F);
+            mPlayer.setLooping(false);
+            mPlayer.prepare();
+            mPlayer.start();
+            return true;
+        } catch (IllegalArgumentException | IOException e) {
+            Log.w(TAG, "startPlay fail, IllegalArgumentException: " + e.getMessage());
+            stopPlay();
+            return false;
+        }
+    }
+
+    /**
+     * Non reactive API.
+     * */
+    @WorkerThread
+    public boolean playNonRxy(final Context context, @RawRes final int audioRes,
+            final MediaPlayer.OnCompletionListener onCompletionListener,
+            final MediaPlayer.OnErrorListener onErrorListener) {
+        stopPlay();
+
+        Log.d(TAG, "MediaPlayer to start play: " + audioRes);
+        mPlayer = MediaPlayer.create(context, audioRes);
+        try {
+            mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(final MediaPlayer mp) {
+                    Log.d(TAG, "OnCompletionListener::onCompletion");
+
+                    // could not call stopPlay immediately, otherwise the second sound
+                    // could not play, thus no complete notification
+                    // TODO discover why?
+                    Observable.timer(50, TimeUnit.MILLISECONDS)
+                            .subscribe(new Action1<Long>() {
+                                @Override
+                                public void call(Long aLong) {
+                                    stopPlay();
+                                    onCompletionListener.onCompletion(mp);
+                                }
+                            }, new Action1<Throwable>() {
+                                @Override
+                                public void call(Throwable throwable) {
+                                    Log.d(TAG, "OnCompletionListener::onError, " + throwable.getMessage());
+                                }
+                            });
+                }
+            });
+            mPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                @Override
+                public boolean onError(MediaPlayer mp, int what, int extra) {
+                    Log.d(TAG, "OnErrorListener::onError" + what + ", " + extra);
+                    onErrorListener.onError(mp, what, extra);
+                    stopPlay();
+                    return true;
+                }
+            });
+            mPlayer.setVolume(1.0F, 1.0F);
+            mPlayer.setLooping(false);
+            mPlayer.start();
+            return true;
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "startPlay fail, IllegalArgumentException: " + e.getMessage());
+            stopPlay();
+            return false;
+        }
+    }
+
     public synchronized boolean stopPlay() {
         if (mPlayer == null) {
             return false;
@@ -175,5 +301,4 @@ public final class RxAudioPlayer {
         mPlayer = null;
         return true;
     }
-
 }
