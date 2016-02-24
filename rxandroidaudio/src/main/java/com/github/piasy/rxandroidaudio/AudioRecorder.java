@@ -128,7 +128,7 @@ public final class AudioRecorder {
         // Handle IOException
         try {
             mRecorder.prepare();
-        } catch (IOException exception) {
+        } catch (IOException | RuntimeException exception) {
             Log.w(TAG, "startRecord fail, prepare fail: " + exception.getMessage());
             setError(ERROR_INTERNAL);
             mRecorder.reset();

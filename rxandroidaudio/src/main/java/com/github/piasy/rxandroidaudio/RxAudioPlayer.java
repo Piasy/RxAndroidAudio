@@ -281,8 +281,8 @@ public final class RxAudioPlayer {
             mPlayer.setLooping(false);
             mPlayer.start();
             return true;
-        } catch (IllegalArgumentException e) {
-            Log.w(TAG, "startPlay fail, IllegalArgumentException: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            Log.w(TAG, "startPlay fail, IllegalStateException: " + e.getMessage());
             stopPlay();
             return false;
         }
@@ -295,9 +295,13 @@ public final class RxAudioPlayer {
 
         mPlayer.setOnCompletionListener(null);
         mPlayer.setOnErrorListener(null);
-        mPlayer.stop();
-        mPlayer.reset();
-        mPlayer.release();
+        try {
+            mPlayer.stop();
+            mPlayer.reset();
+            mPlayer.release();
+        } catch (IllegalStateException e) {
+            Log.w(TAG, "stopPlay fail, IllegalStateException: " + e.getMessage());
+        }
         mPlayer = null;
         return true;
     }
