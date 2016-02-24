@@ -114,12 +114,14 @@ public final class AudioRecorder {
      */
     @WorkerThread
     public synchronized boolean startRecord(int audioSource, int outputFormat, int audioEncoder,
-            File outputFile) {
+            int sampleRate, int bitRate, File outputFile) {
         stopRecord();
 
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(audioSource);
         mRecorder.setOutputFormat(outputFormat);
+        mRecorder.setAudioSamplingRate(sampleRate);
+        mRecorder.setAudioEncodingBitRate(bitRate);
         mRecorder.setAudioEncoder(audioEncoder);
         mRecorder.setOutputFile(outputFile.getAbsolutePath());
 

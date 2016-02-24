@@ -11,13 +11,15 @@
             android:label="@string/app_name"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
             >
-        <activity android:name="com.github.piasy.rxandroidaudio.example.MainActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".StreamActivity"/>
+        <activity android:name=".FileActivity"/>
     </application>
 
 </manifest>
