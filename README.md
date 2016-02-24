@@ -9,9 +9,6 @@ repositories {
     maven {
         url  "http://dl.bintray.com/piasy/maven"
     }
-    maven {
-        url "http://dl.bintray.com/tbruyelle/tbruyelle"
-    }
 }
 
 dependencies {
