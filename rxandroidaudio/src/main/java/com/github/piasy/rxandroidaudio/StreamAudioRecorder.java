@@ -88,12 +88,12 @@ public final class StreamAudioRecorder {
             mAudioFormat = audioFormat;
             int minBufferSize =
                     AudioRecord.getMinBufferSize(sampleRate, channelConfig, mAudioFormat);
-            mByteBufferSize = Math.max(byteBufferSize, minBufferSize);
+            mByteBufferSize = byteBufferSize;
             mShortBufferSize = mByteBufferSize / 2;
             mByteBuffer = new byte[mByteBufferSize];
             mShortBuffer = new short[mShortBufferSize];
             mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate, channelConfig,
-                    audioFormat, mByteBufferSize);
+                    audioFormat, Math.max(minBufferSize, byteBufferSize));
             mAudioDataCallback = audioDataCallback;
         }
 
