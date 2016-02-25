@@ -64,29 +64,12 @@ public final class StreamAudioRecorder {
      * Although Android frameworks jni implementation are the same for ENCODING_PCM_16BIT and
      * ENCODING_PCM_8BIT, the Java doc declared that the buffer type should be the corresponding
      * type, so we use different ways.
-     * */
+     */
     public interface AudioDataCallback {
         @WorkerThread
-        void onAudioByteData(byte[] data, int size);
-
-        @WorkerThread
-        void onAudioShortData(short[] data, int size);
+        void onAudioData(byte[] data, int size);
 
         void onError();
-    }
-
-    public static abstract class AudioByteDataCallback implements AudioDataCallback {
-        @Override
-        public void onAudioShortData(short[] data, int size) {
-            // ignored
-        }
-    }
-
-    public static abstract class AudioShortDataCallback implements AudioDataCallback {
-        @Override
-        public void onAudioByteData(byte[] data, int size) {
-            // ignored
-        }
     }
 
     private class AudioRecordRunnable implements Runnable {
@@ -129,7 +112,8 @@ public final class StreamAudioRecorder {
                     if (mAudioFormat == AudioFormat.ENCODING_PCM_16BIT) {
                         ret = mAudioRecord.read(mShortBuffer, 0, mShortBufferSize);
                         if (ret > 0) {
-                            mAudioDataCallback.onAudioShortData(mShortBuffer, ret);
+                            mAudioDataCallback.onAudioData(
+                                    short2byte(mShortBuffer, ret, mByteBuffer), ret * 2);
                         } else {
                             onError(ret);
                             break;
@@ -137,7 +121,7 @@ public final class StreamAudioRecorder {
                     } else {
                         ret = mAudioRecord.read(mByteBuffer, 0, mByteBufferSize);
                         if (ret > 0) {
-                            mAudioDataCallback.onAudioByteData(mByteBuffer, ret);
+                            mAudioDataCallback.onAudioData(mByteBuffer, ret);
                         } else {
                             onError(ret);
                             break;
@@ -146,6 +130,17 @@ public final class StreamAudioRecorder {
                 }
             }
             mAudioRecord.release();
+        }
+
+        private byte[] short2byte(short[] sData, int size, byte[] bData) {
+            if (size >= sData.length || size * 2 >= bData.length) {
+                Log.w(TAG, "short2byte: too long short data array");
+            }
+            for (int i = 0; i < size; i++) {
+                bData[i * 2] = (byte) (sData[i] & 0x00FF);
+                bData[(i * 2) + 1] = (byte) (sData[i] >> 8);
+            }
+            return bData;
         }
 
         private void onError(int errorCode) {

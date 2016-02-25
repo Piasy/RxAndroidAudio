@@ -6,9 +6,7 @@ Add to gradle dependency of your module build.gradle:
 
 ```gradle
 repositories {
-    maven {
-        url  "http://dl.bintray.com/piasy/maven"
-    }
+    jcenter()
 }
 
 dependencies {
@@ -52,12 +50,12 @@ mOutputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath
         File.separator + System.nanoTime() + ".stream.m4a");
 mOutputFile.createNewFile();
 mFileOutputStream = new FileOutputStream(mOutputFile);
-mStreamAudioRecorder.start(new StreamAudioRecorder.AudioShortDataCallback() {
+mStreamAudioRecorder.start(new StreamAudioRecorder.AudioDataCallback() {
     @Override
-    public void onAudioShortData(short[] data, int size) {
+    public void onAudioData(byte[] data, int size) {
         if (mFileOutputStream != null) {
             try {
-                mFileOutputStream.write(short2byte(data, size), 0, size * 2);
+                mFileOutputStream.write(data, 0, size);
             } catch (IOException e) {
                 e.printStackTrace();
             }

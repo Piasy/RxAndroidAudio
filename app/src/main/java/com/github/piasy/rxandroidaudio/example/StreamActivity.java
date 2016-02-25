@@ -117,12 +117,12 @@ public class StreamActivity extends AppCompatActivity {
                     File.separator + System.nanoTime() + ".stream.m4a");
             mOutputFile.createNewFile();
             mFileOutputStream = new FileOutputStream(mOutputFile);
-            mStreamAudioRecorder.start(new StreamAudioRecorder.AudioShortDataCallback() {
+            mStreamAudioRecorder.start(new StreamAudioRecorder.AudioDataCallback() {
                 @Override
-                public void onAudioShortData(short[] data, int size) {
+                public void onAudioData(byte[] data, int size) {
                     if (mFileOutputStream != null) {
                         try {
-                            mFileOutputStream.write(short2byte(data, size), 0, size * 2);
+                            mFileOutputStream.write(data, 0, size);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -181,15 +181,5 @@ public class StreamActivity extends AppCompatActivity {
                 throwable.printStackTrace();
             }
         });
-    }
-
-    private static final byte[] BYTES = new byte[10 * 1024];
-
-    private byte[] short2byte(short[] sData, int size) {
-        for (int i = 0; i < size; i++) {
-            BYTES[i * 2] = (byte) (sData[i] & 0x00FF);
-            BYTES[(i * 2) + 1] = (byte) (sData[i] >> 8);
-        }
-        return BYTES;
     }
 }
