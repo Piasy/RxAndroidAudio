@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.piasy:rxandroidaudio:1.0.0'
+    compile 'com.github.piasy:rxandroidaudio:1.0.1'
 }
 ```
 
