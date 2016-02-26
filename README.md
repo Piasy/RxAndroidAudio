@@ -14,6 +14,13 @@ dependencies {
 }
 ```
 
+Declare permissions:
+
+```xml
+<uses-permission android:name="android.permission.RECORD_AUDIO"/>
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+```
+
 Use in code:
 
 Record to file:
