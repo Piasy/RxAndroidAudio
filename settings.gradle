@@ -1,1 +1,1 @@
-include ':app', ':rxandroidaudio'
+include ':app', ':rxandroidaudio', ':voiceinputmanager'

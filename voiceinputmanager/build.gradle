@@ -1,0 +1,39 @@
+apply plugin: 'com.android.library'
+apply plugin: 'de.mobilej.unmock'
+apply from: "${rootProject.rootDir}/bintray.gradle"
+
+android {
+    compileSdkVersion rootProject.ext.androidCompileSdkVersion
+    buildToolsVersion rootProject.ext.androidBuildToolsVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.releaseVersionCode
+        versionName rootProject.ext.releaseVersionName
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+unMock {
+    // URI to download the android-all.jar from. e.g. https://oss.sonatype
+    // .org/content/groups/public/org/robolectric/android-all/
+    downloadFrom 'https://oss.sonatype.org/content/groups/public/org/robolectric/android-all/4' +
+            '.3_r2-robolectric-0/android-all-4.3_r2-robolectric-0.jar'
+
+    keep "android.os.Looper"
+    keepStartingWith "android.util."
+}
+
+dependencies {
+    compile project(':rxandroidaudio')
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:2.0.31-beta'
+}

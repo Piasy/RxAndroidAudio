@@ -43,7 +43,7 @@ import java.io.IOException;
  * http://stackoverflow.com/questions/14023291/fatal-signal-11-sigsegv-at-0x00000000-code-1-phonegap
  * </em>
  */
-public final class AudioRecorder {
+public class AudioRecorder {
     private static final String TAG = "AudioRecorder";
 
     private static final int STOP_AUDIO_RECORD_DELAY_MILLIS = 300;
