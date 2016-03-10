@@ -1,7 +1,6 @@
 package com.github.piasy.voiceinputmanager;
 
 import android.media.MediaRecorder;
-import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 import com.github.piasy.rxandroidaudio.AudioRecorder;
@@ -41,7 +40,13 @@ public final class VoiceInputManager {
 
     private VoiceInputState mVoiceInputState;
 
-    private VoiceInputManager(AudioRecorder audioRecorder, File audioFilesDir,
+    public VoiceInputManager(AudioRecorder audioRecorder, File audioFilesDir,
+            EventListener eventListener) {
+        this(audioRecorder, audioFilesDir, eventListener, DEFAULT_MIN_AUDIO_LENGTH_SECONDS,
+                DEFAULT_MAX_AUDIO_LENGTH_SECONDS);
+    }
+
+    public VoiceInputManager(AudioRecorder audioRecorder, File audioFilesDir,
             EventListener eventListener, int minAudioLengthSeconds, int maxAudioLengthSeconds) {
         mAudioRecorder = audioRecorder;
         mAudioFilesDir = audioFilesDir;
@@ -49,31 +54,6 @@ public final class VoiceInputManager {
         mMinAudioLengthSeconds = minAudioLengthSeconds;
         mMaxAudioLengthSeconds = maxAudioLengthSeconds;
         mVoiceInputState = VoiceInputState.init();
-    }
-
-    private static volatile VoiceInputManager sRecorderStateManager;
-
-    public static VoiceInputManager manage(@NonNull AudioRecorder audioRecorder,
-            @NonNull File audioFilesDir, @NonNull EventListener eventListener) {
-        return manage(audioRecorder, audioFilesDir, eventListener, DEFAULT_MIN_AUDIO_LENGTH_SECONDS,
-                DEFAULT_MAX_AUDIO_LENGTH_SECONDS);
-    }
-
-    public static VoiceInputManager manage(@NonNull AudioRecorder audioRecorder,
-            @NonNull File audioFilesDir, @NonNull EventListener eventListener,
-            int minAudioLengthSeconds, int maxAudioLengthSeconds) {
-        if (sRecorderStateManager == null) {
-            synchronized (VoiceInputManager.class) {
-                if (sRecorderStateManager == null) {
-                    sRecorderStateManager =
-                            new VoiceInputManager(audioRecorder, audioFilesDir, eventListener,
-                                    minAudioLengthSeconds, maxAudioLengthSeconds);
-                }
-            }
-        }
-        sRecorderStateManager.mAudioRecorder = audioRecorder;
-        sRecorderStateManager.mEventListener = eventListener;
-        return sRecorderStateManager;
     }
 
     public interface EventListener {
