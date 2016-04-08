@@ -47,6 +47,13 @@ public final class RxAudioPlayer {
 
     MediaPlayer mPlayer;
 
+    public int progress() {
+        if (mPlayer != null) {
+            return mPlayer.getCurrentPosition() / 1000;
+        }
+        return 0;
+    }
+
     private RxAudioPlayer() {
         // singleton
     }
