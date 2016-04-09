@@ -26,7 +26,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.1.1'
 
     compile project(':rxandroidaudio')
-    compile project(':voiceinputmanager')
     compile 'com.jakewharton:butterknife:7.0.1'
     compile ('io.reactivex:rxandroid:1.1.0') {
         exclude module: 'rxjava'

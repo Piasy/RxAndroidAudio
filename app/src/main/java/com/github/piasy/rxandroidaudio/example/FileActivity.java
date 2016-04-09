@@ -25,8 +25,10 @@
 package com.github.piasy.rxandroidaudio.example;
 
 import android.Manifest;
+import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -37,8 +39,8 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.github.piasy.rxandroidaudio.AudioRecorder;
+import com.github.piasy.rxandroidaudio.RxAmplitude;
 import com.github.piasy.rxandroidaudio.RxAudioPlayer;
-import com.github.piasy.voiceinputmanager.VoiceInputManager;
 import com.tbruyelle.rxpermissions.RxPermissions;
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 import java.io.File;
@@ -46,12 +48,18 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import rx.Observable;
+import rx.Single;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public class FileActivity extends RxAppCompatActivity
-        implements AudioRecorder.OnErrorListener, VoiceInputManager.EventListener {
+public class FileActivity extends RxAppCompatActivity implements AudioRecorder.OnErrorListener {
 
+    private static final String TAG = "FileActivity";
+    public static final int MIN_AUDIO_LENGTH_SECONDS = 2;
     public static final int SHOW_INDICATOR_DELAY_MILLIS = 300;
 
     @Bind(R.id.mFlIndicator)
@@ -63,8 +71,10 @@ public class FileActivity extends RxAppCompatActivity
     @Bind(R.id.mTvRecordingHint)
     TextView mTvRecordingHint;
 
+    private AudioRecorder mAudioRecorder;
     private RxAudioPlayer mRxAudioPlayer;
-    private VoiceInputManager mVoiceInputManager;
+
+    private File mAudioFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,12 +91,9 @@ public class FileActivity extends RxAppCompatActivity
         mIvVoiceIndicators.add(ButterKnife.<ImageView>findById(this, R.id.mIvVoiceIndicator6));
         mIvVoiceIndicators.add(ButterKnife.<ImageView>findById(this, R.id.mIvVoiceIndicator7));
 
-        AudioRecorder audioRecorder = AudioRecorder.getInstance();
+        mAudioRecorder = AudioRecorder.getInstance();
         mRxAudioPlayer = RxAudioPlayer.getInstance();
-        audioRecorder.setOnErrorListener(this);
-        mVoiceInputManager =
-                VoiceInputManager.manage(audioRecorder, Environment.getExternalStorageDirectory(),
-                        this);
+        mAudioRecorder.setOnErrorListener(this);
 
         mTvPressToSay.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -110,11 +117,7 @@ public class FileActivity extends RxAppCompatActivity
         });
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mFlIndicator.removeCallbacks(mShowIndicatorRunnable);
-    }
+    private Subscription mRecordSubscription;
 
     private void press2Record() {
         mTvPressToSay.setBackgroundResource(R.drawable.button_press_to_say_pressed_bg);
@@ -152,14 +155,154 @@ public class FileActivity extends RxAppCompatActivity
     }
 
     private void recordAfterPermissionGranted() {
-        mVoiceInputManager.toggleOn();
+        mRecordSubscription = Single.just(true)
+                .subscribeOn(Schedulers.io())
+                .flatMap(new Func1<Boolean, Single<Boolean>>() {
+                    @Override
+                    public Single<Boolean> call(Boolean aBoolean) {
+                        Log.d(TAG, "to play audio_record_start: " + R.raw.audio_record_start);
+                        return mRxAudioPlayer.play(getApplicationContext(),
+                                R.raw.audio_record_start);
+                    }
+                })
+                .doOnSuccess(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        Log.d(TAG, "audio_record_start play finished");
+                    }
+                })
+                .map(new Func1<Boolean, Boolean>() {
+                    @Override
+                    public Boolean call(Boolean aBoolean) {
+                        mAudioFile = new File(
+                                Environment.getExternalStorageDirectory().getAbsolutePath() +
+                                        File.separator + System.nanoTime() + ".file.m4a");
+                        Log.d(TAG, "to prepare record");
+                        return mAudioRecorder.prepareRecord(MediaRecorder.AudioSource.MIC,
+                                MediaRecorder.OutputFormat.MPEG_4, MediaRecorder.AudioEncoder.AAC,
+                                mAudioFile);
+                    }
+                })
+                .doOnSuccess(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        Log.d(TAG, "prepareRecord success");
+                    }
+                })
+                .flatMap(new Func1<Boolean, Single<Boolean>>() {
+                    @Override
+                    public Single<Boolean> call(Boolean aBoolean) {
+                        Log.d(TAG, "to play audio_record_ready: " + R.raw.audio_record_ready);
+                        return mRxAudioPlayer.play(getApplicationContext(),
+                                R.raw.audio_record_ready);
+                    }
+                })
+                .doOnSuccess(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        Log.d(TAG, "audio_record_ready play finished");
+                    }
+                })
+                .map(new Func1<Boolean, Boolean>() {
+                    @Override
+                    public Boolean call(Boolean aBoolean) {
+                        // TODO why need delay?
+                        mFlIndicator.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                mFlIndicator.setVisibility(View.VISIBLE);
+                            }
+                        }, SHOW_INDICATOR_DELAY_MILLIS);
+                        return mAudioRecorder.startRecord();
+                    }
+                })
+                .doOnSuccess(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        Log.d(TAG, "startRecord success");
+                    }
+                })
+                .toObservable()
+                .flatMap(new Func1<Boolean, Observable<Integer>>() {
+                    @Override
+                    public Observable<Integer> call(Boolean aBoolean) {
+                        return RxAmplitude.from(mAudioRecorder);
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .compose(this.<Integer>bindToLifecycle())
+                .subscribe(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer level) {
+                        int progress = mAudioRecorder.progress();
+                        Log.d(TAG, "amplitude: " + level + ", progress: " + progress);
+
+                        refreshAudioAmplitudeView(level);
+
+                        if (progress >= 12) {
+                            mTvRecordingHint.setText(String.format(
+                                    getString(R.string.voice_msg_input_hint_time_limited_formatter),
+                                    15 - progress));
+                            if (progress == 15) {
+                                release2Send();
+                            }
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
+                });
     }
 
     private void release2Send() {
         mTvPressToSay.setBackgroundResource(R.drawable.button_press_to_say_bg);
         mFlIndicator.setVisibility(View.GONE);
-        mFlIndicator.removeCallbacks(mShowIndicatorRunnable);
-        mVoiceInputManager.toggleOff();
+
+        if (mRecordSubscription != null && !mRecordSubscription.isUnsubscribed()) {
+            mRecordSubscription.unsubscribe();
+            mRecordSubscription = null;
+        }
+
+        Log.d(TAG, "to play audio_record_end: " + R.raw.audio_record_end);
+        mRxAudioPlayer.play(getApplicationContext(), R.raw.audio_record_end)
+                .doOnSuccess(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        Log.d(TAG, "audio_record_end play finished");
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .map(new Func1<Boolean, Boolean>() {
+                    @Override
+                    public Boolean call(Boolean aBoolean) {
+                        int seconds = mAudioRecorder.stopRecord();
+                        if (seconds >= MIN_AUDIO_LENGTH_SECONDS) {
+                            mAudioFiles.offer(mAudioFile);
+                            return true;
+                        }
+                        return false;
+                    }
+                })
+                .toObservable()
+                .observeOn(AndroidSchedulers.mainThread())
+                .compose(this.<Boolean>bindToLifecycle())
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean added) {
+                        if (added) {
+                            mTvLog.setText(
+                                    mTvLog.getText() + "\n" + "audio file " + mAudioFile.getName() +
+                                            " added");
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
+                });
     }
 
     List<ImageView> mIvVoiceIndicators;
@@ -210,66 +353,5 @@ public class FileActivity extends RxAppCompatActivity
     @Override
     public void onError(int error) {
         Toast.makeText(this, "Error code: " + error, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onPreparing() {
-        mRxAudioPlayer.play(getApplicationContext(), R.raw.audio_record_start).toBlocking().value();
-    }
-
-    private Runnable mShowIndicatorRunnable = new Runnable() {
-        @Override
-        public void run() {
-            mFlIndicator.setVisibility(View.VISIBLE);
-        }
-    };
-
-    @Override
-    public void onPrepared() {
-        mFlIndicator.postDelayed(mShowIndicatorRunnable, SHOW_INDICATOR_DELAY_MILLIS);
-        mRxAudioPlayer.play(getApplicationContext(), R.raw.audio_record_ready).toBlocking().value();
-    }
-
-    @Override
-    public void onStopped() {
-        mRxAudioPlayer.play(getApplicationContext(), R.raw.audio_record_end).toBlocking().value();
-    }
-
-    @Override
-    public void onSend(final File audioFile, int duration) {
-        mAudioFiles.offer(audioFile);
-        try {
-            Thread.sleep(5 * 1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        mTvLog.post(new Runnable() {
-            @Override
-            public void run() {
-                mTvLog.setText(mTvLog.getText() + "\n" + "audio file " + audioFile.getName() +
-                        " added");
-            }
-        });
-    }
-
-    @Override
-    public void onAmplitudeChanged(final int level) {
-        mFlIndicator.post(new Runnable() {
-            @Override
-            public void run() {
-                refreshAudioAmplitudeView(level);
-            }
-        });
-    }
-
-    @Override
-    public void onExpireCountdown(final int second) {
-        mTvRecordingHint.post(new Runnable() {
-            @Override
-            public void run() {
-                mTvRecordingHint.setText(String.format(
-                        getString(R.string.voice_msg_input_hint_time_limited_formatter), second));
-            }
-        });
     }
 }
