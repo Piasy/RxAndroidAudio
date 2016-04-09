@@ -85,7 +85,7 @@ public class FileActivity extends RxAppCompatActivity
         mRxAudioPlayer = RxAudioPlayer.getInstance();
         audioRecorder.setOnErrorListener(this);
         mVoiceInputManager =
-                new VoiceInputManager(audioRecorder, Environment.getExternalStorageDirectory(),
+                VoiceInputManager.manage(audioRecorder, Environment.getExternalStorageDirectory(),
                         this);
 
         mTvPressToSay.setOnTouchListener(new View.OnTouchListener() {

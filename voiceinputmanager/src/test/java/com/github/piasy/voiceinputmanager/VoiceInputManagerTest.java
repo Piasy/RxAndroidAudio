@@ -29,7 +29,8 @@ public class VoiceInputManagerTest {
     public void setUp() {
         mAudioRecorder = mock(AudioRecorder.class);
         mEventListener = mock(VoiceInputManager.EventListener.class);
-        mVoiceInputManager = new VoiceInputManager(mAudioRecorder, new File("."), mEventListener);
+        mVoiceInputManager =
+                VoiceInputManager.manage(mAudioRecorder, new File("."), mEventListener);
     }
 
     @After
@@ -58,7 +59,7 @@ public class VoiceInputManagerTest {
         then(mEventListener).should(times(1)).onPrepared();
         then(mEventListener).should(times(1)).onStopped();
         then(mEventListener).should(atLeastOnce()).onAmplitudeChanged(anyInt());
-        then(mEventListener).should(times(1)).onSend(any(File.class), anyInt());
+        then(mEventListener).should(times(1)).onSend(any(File.class));
         then(mEventListener).should(never()).onExpireCountdown(anyInt());
     }
 
@@ -84,7 +85,7 @@ public class VoiceInputManagerTest {
         then(mEventListener).should(times(1)).onPrepared();
         then(mEventListener).should(times(1)).onStopped();
         then(mEventListener).should(atLeastOnce()).onAmplitudeChanged(anyInt());
-        then(mEventListener).should(times(1)).onSend(any(File.class), anyInt());
+        then(mEventListener).should(times(1)).onSend(any(File.class));
         then(mEventListener).should(atLeastOnce()).onExpireCountdown(anyInt());
     }
 
@@ -108,7 +109,7 @@ public class VoiceInputManagerTest {
         then(mEventListener).should(times(1)).onPrepared();
         then(mEventListener).should(times(1)).onStopped();
         then(mEventListener).should(atLeastOnce()).onAmplitudeChanged(anyInt());
-        then(mEventListener).should(times(1)).onSend(any(File.class), anyInt());
+        then(mEventListener).should(times(1)).onSend(any(File.class));
         then(mEventListener).should(atLeastOnce()).onExpireCountdown(anyInt());
     }
 
@@ -133,7 +134,7 @@ public class VoiceInputManagerTest {
         then(mEventListener).should(times(1)).onPrepared();
         then(mEventListener).should(times(1)).onStopped();
         then(mEventListener).should(atLeastOnce()).onAmplitudeChanged(anyInt());
-        then(mEventListener).should(never()).onSend(any(File.class), anyInt());
+        then(mEventListener).should(never()).onSend(any(File.class));
         then(mEventListener).should(never()).onExpireCountdown(anyInt());
     }
 
@@ -160,7 +161,7 @@ public class VoiceInputManagerTest {
         then(mEventListener).should(times(2)).onPrepared();
         then(mEventListener).should(times(1)).onStopped();
         then(mEventListener).should(atLeastOnce()).onAmplitudeChanged(anyInt());
-        then(mEventListener).should(times(1)).onSend(any(File.class), anyInt());
+        then(mEventListener).should(times(1)).onSend(any(File.class));
         then(mEventListener).should(never()).onExpireCountdown(anyInt());
     }
 
@@ -188,7 +189,7 @@ public class VoiceInputManagerTest {
             }
 
             @Override
-            public void onSend(File audioFile, int duration) {
+            public void onSend(File audioFile) {
                 try {
                     latch.await();
                 } catch (InterruptedException e) {
@@ -206,7 +207,8 @@ public class VoiceInputManagerTest {
 
             }
         };
-        mVoiceInputManager = new VoiceInputManager(mAudioRecorder, new File("."), mEventListener);
+        mVoiceInputManager =
+                VoiceInputManager.manage(mAudioRecorder, new File("."), mEventListener);
 
         mVoiceInputManager.toggleOn();
         sleep(500);
