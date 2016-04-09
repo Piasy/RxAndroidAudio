@@ -55,8 +55,8 @@ public final class StreamAudioPlayer {
     }
 
     public synchronized void init() {
-        init(DEFAULT_SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO,
-                AudioFormat.ENCODING_PCM_16BIT, DEFAULT_BUFFER_SIZE);
+        init(DEFAULT_SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT,
+                DEFAULT_BUFFER_SIZE);
     }
 
     /**
@@ -70,8 +70,9 @@ public final class StreamAudioPlayer {
             mAudioTrack = null;
         }
         int minBufferSize = AudioTrack.getMinBufferSize(sampleRate, channelConfig, audioFormat);
-        mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, channelConfig,
-                audioFormat, Math.max(bufferSize, minBufferSize), AudioTrack.MODE_STREAM);
+        mAudioTrack =
+                new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, channelConfig, audioFormat,
+                        Math.max(bufferSize, minBufferSize), AudioTrack.MODE_STREAM);
         mAudioTrack.play();
     }
 

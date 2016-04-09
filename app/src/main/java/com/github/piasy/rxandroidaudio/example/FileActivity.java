@@ -58,10 +58,21 @@ import rx.schedulers.Schedulers;
 
 public class FileActivity extends RxAppCompatActivity implements AudioRecorder.OnErrorListener {
 
-    private static final String TAG = "FileActivity";
     public static final int MIN_AUDIO_LENGTH_SECONDS = 2;
     public static final int SHOW_INDICATOR_DELAY_MILLIS = 300;
-
+    private static final String TAG = "FileActivity";
+    private static final ButterKnife.Action<View> INVISIBLE = new ButterKnife.Action<View>() {
+        @Override
+        public void apply(View view, int index) {
+            view.setVisibility(View.INVISIBLE);
+        }
+    };
+    private static final ButterKnife.Action<View> VISIBLE = new ButterKnife.Action<View>() {
+        @Override
+        public void apply(View view, int index) {
+            view.setVisibility(View.VISIBLE);
+        }
+    };
     @Bind(R.id.mFlIndicator)
     FrameLayout mFlIndicator;
     @Bind(R.id.mTvPressToSay)
@@ -70,11 +81,12 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
     TextView mTvLog;
     @Bind(R.id.mTvRecordingHint)
     TextView mTvRecordingHint;
-
+    List<ImageView> mIvVoiceIndicators;
     private AudioRecorder mAudioRecorder;
     private RxAudioPlayer mRxAudioPlayer;
-
     private File mAudioFile;
+    private Subscription mRecordSubscription;
+    private Queue<File> mAudioFiles = new LinkedList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,8 +128,6 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
             }
         });
     }
-
-    private Subscription mRecordSubscription;
 
     private void press2Record() {
         mTvPressToSay.setBackgroundResource(R.drawable.button_press_to_say_pressed_bg);
@@ -305,29 +315,11 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
                 });
     }
 
-    List<ImageView> mIvVoiceIndicators;
-
-    private static final ButterKnife.Action<View> INVISIBLE = new ButterKnife.Action<View>() {
-        @Override
-        public void apply(View view, int index) {
-            view.setVisibility(View.INVISIBLE);
-        }
-    };
-
-    private static final ButterKnife.Action<View> VISIBLE = new ButterKnife.Action<View>() {
-        @Override
-        public void apply(View view, int index) {
-            view.setVisibility(View.VISIBLE);
-        }
-    };
-
     private void refreshAudioAmplitudeView(int level) {
         int end = level < mIvVoiceIndicators.size() ? level : mIvVoiceIndicators.size();
         ButterKnife.apply(mIvVoiceIndicators.subList(0, end), VISIBLE);
         ButterKnife.apply(mIvVoiceIndicators.subList(end, mIvVoiceIndicators.size()), INVISIBLE);
     }
-
-    private Queue<File> mAudioFiles = new LinkedList<>();
 
     @OnClick(R.id.mBtnPlay)
     public void startPlay() {

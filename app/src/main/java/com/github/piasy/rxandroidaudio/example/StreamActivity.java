@@ -46,17 +46,14 @@ import rx.schedulers.Schedulers;
 
 public class StreamActivity extends AppCompatActivity {
 
+    static final int BUFFER_SIZE = 2048;
+    byte[] mBuffer;
+    @Bind(R.id.mBtnStart)
+    Button mBtnStart;
     private StreamAudioRecorder mStreamAudioRecorder;
     private StreamAudioPlayer mStreamAudioPlayer;
     private FileOutputStream mFileOutputStream;
     private File mOutputFile;
-
-    byte[] mBuffer;
-    static final int BUFFER_SIZE = 2048;
-
-    @Bind(R.id.mBtnStart)
-    Button mBtnStart;
-
     private boolean mIsRecording = false;
 
     @Override
@@ -93,8 +90,8 @@ public class StreamActivity extends AppCompatActivity {
                                     Toast.makeText(getApplicationContext(), "Permission granted",
                                             Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(getApplicationContext(), "Permission not granted",
-                                            Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(),
+                                            "Permission not granted", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         }, new Action1<Throwable>() {

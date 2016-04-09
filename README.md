@@ -112,3 +112,6 @@ See [full example](https://github.com/Piasy/RxAndroidAudio/tree/master/app) for 
 
 ## Dev tips
 +  You need create an empty file named `bintray.properties` under root project dir, which is used for uploading artifact to bintray.
+
+## Contribution
++  Please follow [my code style based on SquareAndroid](https://github.com/Piasy/java-code-styles)

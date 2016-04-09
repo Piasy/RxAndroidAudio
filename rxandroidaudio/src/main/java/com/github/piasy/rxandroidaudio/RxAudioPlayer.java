@@ -177,7 +177,7 @@ public final class RxAudioPlayer {
 
     /**
      * Non reactive API.
-     * */
+     */
     @WorkerThread
     public boolean playNonRxy(@NonNull final File audioFile,
             final MediaPlayer.OnCompletionListener onCompletionListener,
@@ -196,20 +196,18 @@ public final class RxAudioPlayer {
                     // could not call stopPlay immediately, otherwise the second sound
                     // could not play, thus no complete notification
                     // TODO discover why?
-                    Observable.timer(50, TimeUnit.MILLISECONDS)
-                            .subscribe(new Action1<Long>() {
-                                @Override
-                                public void call(Long aLong) {
-                                    stopPlay();
-                                    onCompletionListener.onCompletion(mp);
-                                }
-                            }, new Action1<Throwable>() {
-                                @Override
-                                public void call(Throwable throwable) {
-                                    Log.d(TAG, "OnCompletionListener::onError, " +
-                                            throwable.getMessage());
-                                }
-                            });
+                    Observable.timer(50, TimeUnit.MILLISECONDS).subscribe(new Action1<Long>() {
+                        @Override
+                        public void call(Long aLong) {
+                            stopPlay();
+                            onCompletionListener.onCompletion(mp);
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            Log.d(TAG, "OnCompletionListener::onError, " + throwable.getMessage());
+                        }
+                    });
                 }
             });
             mPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
@@ -235,7 +233,7 @@ public final class RxAudioPlayer {
 
     /**
      * Non reactive API.
-     * */
+     */
     @WorkerThread
     public boolean playNonRxy(final Context context, @RawRes final int audioRes,
             final MediaPlayer.OnCompletionListener onCompletionListener,
@@ -253,19 +251,18 @@ public final class RxAudioPlayer {
                     // could not call stopPlay immediately, otherwise the second sound
                     // could not play, thus no complete notification
                     // TODO discover why?
-                    Observable.timer(50, TimeUnit.MILLISECONDS)
-                            .subscribe(new Action1<Long>() {
-                                @Override
-                                public void call(Long aLong) {
-                                    stopPlay();
-                                    onCompletionListener.onCompletion(mp);
-                                }
-                            }, new Action1<Throwable>() {
-                                @Override
-                                public void call(Throwable throwable) {
-                                    Log.d(TAG, "OnCompletionListener::onError, " + throwable.getMessage());
-                                }
-                            });
+                    Observable.timer(50, TimeUnit.MILLISECONDS).subscribe(new Action1<Long>() {
+                        @Override
+                        public void call(Long aLong) {
+                            stopPlay();
+                            onCompletionListener.onCompletion(mp);
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            Log.d(TAG, "OnCompletionListener::onError, " + throwable.getMessage());
+                        }
+                    });
                 }
             });
             mPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {

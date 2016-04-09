@@ -56,25 +56,25 @@ public final class RxAmplitude {
         return from(audioRecorder, DEFAULT_AMPLITUDE_INTERVAL);
     }
 
-    public static Observable<Integer> from(@NonNull final AudioRecorder audioRecorder, long interval) {
+    public static Observable<Integer> from(@NonNull final AudioRecorder audioRecorder,
+            long interval) {
         return new RxAmplitude().start(audioRecorder, interval);
     }
 
     private Observable<Integer> start(@NonNull final AudioRecorder audioRecorder, long interval) {
-        return Observable.interval(interval, TimeUnit.MILLISECONDS)
-                .map(new Func1<Long, Integer>() {
-                    @Override
-                    public Integer call(Long aLong) {
-                        int amplitude;
-                        try {
-                            amplitude = audioRecorder.getMaxAmplitude();
-                        } catch (RuntimeException e) {
-                            Log.i(TAG, "getMaxAmplitude fail: " + e.getMessage());
-                            amplitude = mRandom.nextInt(AMPLITUDE_MAX_VALUE);
-                        }
-                        amplitude = amplitude / (AMPLITUDE_MAX_VALUE / AMPLITUDE_MAX_LEVEL);
-                        return amplitude;
-                    }
-                });
+        return Observable.interval(interval, TimeUnit.MILLISECONDS).map(new Func1<Long, Integer>() {
+            @Override
+            public Integer call(Long aLong) {
+                int amplitude;
+                try {
+                    amplitude = audioRecorder.getMaxAmplitude();
+                } catch (RuntimeException e) {
+                    Log.i(TAG, "getMaxAmplitude fail: " + e.getMessage());
+                    amplitude = mRandom.nextInt(AMPLITUDE_MAX_VALUE);
+                }
+                amplitude = amplitude / (AMPLITUDE_MAX_VALUE / AMPLITUDE_MAX_LEVEL);
+                return amplitude;
+            }
+        });
     }
 }
