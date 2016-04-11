@@ -1,6 +1,8 @@
 # RxAndroidAudio
 Android Audio encapsulation library, with part Rx support.
 
+[ ![Download](https://api.bintray.com/packages/piasy/maven/RxAndroidAudio/images/download.svg) ](https://bintray.com/piasy/maven/RxAndroidAudio/_latestVersion)
+
 ## Usage
 Add to gradle dependency of your module build.gradle:
 
@@ -10,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.piasy:rxandroidaudio:1.0.2'
+    compile 'com.github.piasy:rxandroidaudio:1.2.0'
 }
 ```
 
@@ -37,15 +39,17 @@ mAudioRecorder.prepareRecord(MediaRecorder.AudioSource.MIC,
 mAudioRecorder.stopRecord();
 ```
 
-Play a file:
+Play a file with PlayConfig, to set audio file or audio resource, set volume, or looping:
 
 ```java
-mRxAudioPlayer.play(audioFile)
+mRxAudioPlayer.play(PlayConfig.file(audioFile).looping(true).build())
         .subscribeOn(Schedulers.io())
         .subscribe(new Action1<Boolean>() {
             @Override
             public void call(Boolean aBoolean) {
                 // play finished
+                // NOTE: if looping, the Single will never finish, you need stop playing
+                // onDestroy, otherwise, memory leak will happen!
             }
         });
 ```

@@ -39,6 +39,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.github.piasy.rxandroidaudio.AudioRecorder;
+import com.github.piasy.rxandroidaudio.PlayConfig;
 import com.github.piasy.rxandroidaudio.RxAmplitude;
 import com.github.piasy.rxandroidaudio.RxAudioPlayer;
 import com.tbruyelle.rxpermissions.RxPermissions;
@@ -129,6 +130,14 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
         });
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mRxAudioPlayer != null) {
+            mRxAudioPlayer.stopPlay();
+        }
+    }
+
     private void press2Record() {
         mTvPressToSay.setBackgroundResource(R.drawable.button_press_to_say_pressed_bg);
         mTvRecordingHint.setText(R.string.voice_msg_input_hint_speaking);
@@ -171,8 +180,9 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
                     @Override
                     public Single<Boolean> call(Boolean aBoolean) {
                         Log.d(TAG, "to play audio_record_start: " + R.raw.audio_record_start);
-                        return mRxAudioPlayer.play(getApplicationContext(),
-                                R.raw.audio_record_start);
+                        return mRxAudioPlayer.play(
+                                PlayConfig.res(getApplicationContext(), R.raw.audio_record_start)
+                                        .build());
                     }
                 })
                 .doOnSuccess(new Action1<Boolean>() {
@@ -203,8 +213,9 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
                     @Override
                     public Single<Boolean> call(Boolean aBoolean) {
                         Log.d(TAG, "to play audio_record_ready: " + R.raw.audio_record_ready);
-                        return mRxAudioPlayer.play(getApplicationContext(),
-                                R.raw.audio_record_ready);
+                        return mRxAudioPlayer.play(
+                                PlayConfig.res(getApplicationContext(), R.raw.audio_record_ready)
+                                        .build());
                     }
                 })
                 .doOnSuccess(new Action1<Boolean>() {
@@ -276,7 +287,7 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
         }
 
         Log.d(TAG, "to play audio_record_end: " + R.raw.audio_record_end);
-        mRxAudioPlayer.play(getApplicationContext(), R.raw.audio_record_end)
+        mRxAudioPlayer.play(PlayConfig.res(getApplicationContext(), R.raw.audio_record_end).build())
                 .doOnSuccess(new Action1<Boolean>() {
                     @Override
                     public void call(Boolean aBoolean) {
@@ -326,7 +337,7 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
         mTvLog.setText("");
         if (!mAudioFiles.isEmpty()) {
             File audioFile = mAudioFiles.poll();
-            mRxAudioPlayer.play(audioFile)
+            mRxAudioPlayer.play(PlayConfig.file(audioFile).looping(true).build())
                     .subscribeOn(Schedulers.io())
                     .subscribe(new Action1<Boolean>() {
                         @Override
