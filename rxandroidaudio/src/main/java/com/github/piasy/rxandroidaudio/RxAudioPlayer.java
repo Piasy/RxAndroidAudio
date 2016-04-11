@@ -30,9 +30,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RawRes;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+
 import rx.Observable;
 import rx.Single;
 import rx.SingleSubscriber;
@@ -51,12 +53,15 @@ public final class RxAudioPlayer {
         // singleton
     }
 
-    private static class RxAudioPlayerHolder {
-        private static final RxAudioPlayer INSTANCE = new RxAudioPlayer();
-    }
-
     public static RxAudioPlayer getInstance() {
         return RxAudioPlayerHolder.INSTANCE;
+    }
+
+    public int progress() {
+        if (mPlayer != null) {
+            return mPlayer.getCurrentPosition() / 1000;
+        }
+        return 0;
     }
 
     /**
@@ -180,8 +185,8 @@ public final class RxAudioPlayer {
      */
     @WorkerThread
     public boolean playNonRxy(@NonNull final File audioFile,
-            final MediaPlayer.OnCompletionListener onCompletionListener,
-            final MediaPlayer.OnErrorListener onErrorListener) {
+                              final MediaPlayer.OnCompletionListener onCompletionListener,
+                              final MediaPlayer.OnErrorListener onErrorListener) {
         stopPlay();
 
         Log.d(TAG, "MediaPlayer to start play: " + audioFile.getName());
@@ -236,8 +241,8 @@ public final class RxAudioPlayer {
      */
     @WorkerThread
     public boolean playNonRxy(final Context context, @RawRes final int audioRes,
-            final MediaPlayer.OnCompletionListener onCompletionListener,
-            final MediaPlayer.OnErrorListener onErrorListener) {
+                              final MediaPlayer.OnCompletionListener onCompletionListener,
+                              final MediaPlayer.OnErrorListener onErrorListener) {
         stopPlay();
 
         Log.d(TAG, "MediaPlayer to start play: " + audioRes);
@@ -301,5 +306,9 @@ public final class RxAudioPlayer {
         }
         mPlayer = null;
         return true;
+    }
+
+    private static class RxAudioPlayerHolder {
+        private static final RxAudioPlayer INSTANCE = new RxAudioPlayer();
     }
 }
