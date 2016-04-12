@@ -36,6 +36,7 @@ mAudioFile = new File(
 mAudioRecorder.prepareRecord(MediaRecorder.AudioSource.MIC,
         MediaRecorder.OutputFormat.MPEG_4, MediaRecorder.AudioEncoder.AAC,
         mAudioFile);
+mAudioRecorder.startRecord();
 // ...
 mAudioRecorder.stopRecord();
 ```
