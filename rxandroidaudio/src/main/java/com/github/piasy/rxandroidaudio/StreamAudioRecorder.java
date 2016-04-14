@@ -133,7 +133,7 @@ public final class StreamAudioRecorder {
         }
 
         private byte[] short2byte(short[] sData, int size, byte[] bData) {
-            if (size >= sData.length || size * 2 >= bData.length) {
+            if (size > sData.length || size * 2 > bData.length) {
                 Log.w(TAG, "short2byte: too long short data array");
             }
             for (int i = 0; i < size; i++) {
