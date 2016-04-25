@@ -37,8 +37,7 @@ import android.util.Log;
  */
 public final class StreamAudioPlayer {
     private static final String TAG = "StreamAudioPlayer";
-    public static final int DEFAULT_SAMPLE_RATE = 16000;
-    public static final int DEFAULT_BUFFER_SIZE = 2048;
+    public static final int DEFAULT_SAMPLE_RATE = 44100;
 
     private AudioTrack mAudioTrack;
 
@@ -55,16 +54,14 @@ public final class StreamAudioPlayer {
     }
 
     public synchronized void init() {
-        init(DEFAULT_SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT,
-                DEFAULT_BUFFER_SIZE);
+        init(DEFAULT_SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
     }
 
     /**
      * AudioFormat.CHANNEL_OUT_MONO
      * AudioFormat.ENCODING_PCM_16BIT
      */
-    public synchronized void init(int sampleRate, int channelConfig, int audioFormat,
-            int bufferSize) {
+    public synchronized void init(int sampleRate, int channelConfig, int audioFormat) {
         if (mAudioTrack != null) {
             mAudioTrack.release();
             mAudioTrack = null;
@@ -72,7 +69,7 @@ public final class StreamAudioPlayer {
         int minBufferSize = AudioTrack.getMinBufferSize(sampleRate, channelConfig, audioFormat);
         mAudioTrack =
                 new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, channelConfig, audioFormat,
-                        Math.max(bufferSize, minBufferSize), AudioTrack.MODE_STREAM);
+                        minBufferSize, AudioTrack.MODE_STREAM);
         mAudioTrack.play();
     }
 

@@ -47,8 +47,8 @@ public final class AudioRecorder {
     private static final String TAG = "AudioRecorder";
 
     private static final int STOP_AUDIO_RECORD_DELAY_MILLIS = 300;
-    public static final int DEFAULT_SAMPLE_RATE = 8000;
-    public static final int DEFAULT_BIT_RATE = 16000;
+    public static final int DEFAULT_SAMPLE_RATE = 44100;
+    public static final int DEFAULT_BIT_RATE = 44100;
 
     private AudioRecorder() {
         // singleton

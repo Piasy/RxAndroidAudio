@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public final class StreamAudioRecorder {
     private static final String TAG = "StreamAudioRecorder";
-    public static final int DEFAULT_SAMPLE_RATE = 16000;
+    public static final int DEFAULT_SAMPLE_RATE = 44100;
     public static final int DEFAULT_BUFFER_SIZE = 2048;
 
     private ExecutorService mExecutorService;

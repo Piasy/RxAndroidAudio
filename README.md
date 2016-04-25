@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.piasy:rxandroidaudio:1.2.1'
+    compile 'com.github.piasy:rxandroidaudio:1.2.2'
 }
 ```
 
@@ -40,6 +40,10 @@ mAudioRecorder.startRecord();
 // ...
 mAudioRecorder.stopRecord();
 ```
+
+**Note**: If you record a aac file, the sound quality will be poor if the sample rate and encoding
+bit rate is low, the sound quality will increase when you set a bigger sample rate and encoding
+bit rate, but as the sound quality improve, the recorded file size will also increase.
 
 #### Play a file
 With PlayConfig, to set audio file or audio resource, set volume, or looping:

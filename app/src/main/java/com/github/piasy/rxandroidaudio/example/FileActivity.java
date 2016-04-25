@@ -24,6 +24,13 @@
 
 package com.github.piasy.rxandroidaudio.example;
 
+import com.github.piasy.rxandroidaudio.AudioRecorder;
+import com.github.piasy.rxandroidaudio.PlayConfig;
+import com.github.piasy.rxandroidaudio.RxAmplitude;
+import com.github.piasy.rxandroidaudio.RxAudioPlayer;
+import com.tbruyelle.rxpermissions.RxPermissions;
+import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
+
 import android.Manifest;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -35,20 +42,16 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.Bind;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import com.github.piasy.rxandroidaudio.AudioRecorder;
-import com.github.piasy.rxandroidaudio.PlayConfig;
-import com.github.piasy.rxandroidaudio.RxAmplitude;
-import com.github.piasy.rxandroidaudio.RxAudioPlayer;
-import com.tbruyelle.rxpermissions.RxPermissions;
-import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import rx.Observable;
 import rx.Single;
 import rx.Subscription;
@@ -60,33 +63,47 @@ import rx.schedulers.Schedulers;
 public class FileActivity extends RxAppCompatActivity implements AudioRecorder.OnErrorListener {
 
     public static final int MIN_AUDIO_LENGTH_SECONDS = 2;
+
     public static final int SHOW_INDICATOR_DELAY_MILLIS = 300;
+
     private static final String TAG = "FileActivity";
+
     private static final ButterKnife.Action<View> INVISIBLE = new ButterKnife.Action<View>() {
         @Override
         public void apply(View view, int index) {
             view.setVisibility(View.INVISIBLE);
         }
     };
+
     private static final ButterKnife.Action<View> VISIBLE = new ButterKnife.Action<View>() {
         @Override
         public void apply(View view, int index) {
             view.setVisibility(View.VISIBLE);
         }
     };
+
     @Bind(R.id.mFlIndicator)
     FrameLayout mFlIndicator;
+
     @Bind(R.id.mTvPressToSay)
     TextView mTvPressToSay;
+
     @Bind(R.id.mTvLog)
     TextView mTvLog;
+
     @Bind(R.id.mTvRecordingHint)
     TextView mTvRecordingHint;
+
     List<ImageView> mIvVoiceIndicators;
+
     private AudioRecorder mAudioRecorder;
+
     private RxAudioPlayer mRxAudioPlayer;
+
     private File mAudioFile;
+
     private Subscription mRecordSubscription;
+
     private Queue<File> mAudioFiles = new LinkedList<>();
 
     @Override
@@ -200,7 +217,7 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
                         Log.d(TAG, "to prepare record");
                         return mAudioRecorder.prepareRecord(MediaRecorder.AudioSource.MIC,
                                 MediaRecorder.OutputFormat.MPEG_4, MediaRecorder.AudioEncoder.AAC,
-                                mAudioFile);
+                                192000, 192000, mAudioFile);
                     }
                 })
                 .doOnSuccess(new Action1<Boolean>() {
@@ -337,8 +354,9 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
         mTvLog.setText("");
         if (!mAudioFiles.isEmpty()) {
             File audioFile = mAudioFiles.poll();
-            mRxAudioPlayer.play(PlayConfig.file(audioFile).looping(true).build())
+            mRxAudioPlayer.play(PlayConfig.file(audioFile).build())
                     .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Action1<Boolean>() {
                         @Override
                         public void call(Boolean aBoolean) {
