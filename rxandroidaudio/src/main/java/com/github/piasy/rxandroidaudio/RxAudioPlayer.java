@@ -181,7 +181,6 @@ public final class RxAudioPlayer {
                         mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
                         mPlayer.setLooping(config.mLooping);
                         subscriber.onNext(true);
-//                        mPlayer.start();
                     } catch (IllegalArgumentException e) {
                         Log.w(TAG, "startPlay fail, IllegalArgumentException: " + e.getMessage());
                         stopPlay();
