@@ -92,23 +92,23 @@ public final class RxAudioPlayer {
                 config.mAudioFile.exists()) {
             return Observable.create(new Observable.OnSubscribe<Boolean>() {
                 @Override
-                public void call(final Subscriber<? super Boolean> singleSubscriber) {
+                public void call(final Subscriber<? super Boolean> subscriber) {
                     stopPlay();
 
                     Log.d(TAG, "MediaPlayer to start play: " + config.mAudioFile.getName());
                     mPlayer = new MediaPlayer();
                     try {
                         mPlayer.setDataSource(config.mAudioFile.getAbsolutePath());
-                        setMediaPlayerListener(singleSubscriber);
+                        setMediaPlayerListener(subscriber);
                         mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
                         mPlayer.setLooping(config.mLooping);
                         mPlayer.prepare();
-                        singleSubscriber.onNext(true);
+                        subscriber.onNext(true);
                         mPlayer.start();
                     } catch (IllegalArgumentException | IOException e) {
                         Log.w(TAG, "startPlay fail, IllegalArgumentException: " + e.getMessage());
                         stopPlay();
-                        singleSubscriber.onError(e);
+                        subscriber.onError(e);
                     }
                 }
             });
@@ -116,21 +116,21 @@ public final class RxAudioPlayer {
                 config.mContext != null) {
             return Observable.create(new Observable.OnSubscribe<Boolean>() {
                 @Override
-                public void call(final Subscriber<? super Boolean> singleSubscriber) {
+                public void call(final Subscriber<? super Boolean> subscriber) {
                     stopPlay();
 
                     Log.d(TAG, "MediaPlayer to start play: " + config.mAudioResource);
                     mPlayer = MediaPlayer.create(config.mContext, config.mAudioResource);
                     try {
-                        setMediaPlayerListener(singleSubscriber);
+                        setMediaPlayerListener(subscriber);
                         mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
                         mPlayer.setLooping(config.mLooping);
-                        singleSubscriber.onNext(true);
+                        subscriber.onNext(true);
                         mPlayer.start();
                     } catch (IllegalArgumentException e) {
                         Log.w(TAG, "startPlay fail, IllegalArgumentException: " + e.getMessage());
                         stopPlay();
-                        singleSubscriber.onError(e);
+                        subscriber.onError(e);
                     }
                 }
             });
@@ -148,23 +148,22 @@ public final class RxAudioPlayer {
             return Observable.create(new Observable.OnSubscribe<Boolean>() {
 
                 @Override
-                public void call(final Subscriber<? super Boolean> singleSubscriber) {
+                public void call(final Subscriber<? super Boolean> subscriber) {
                     stopPlay();
 
                     Log.d(TAG, "MediaPlayer to start play: " + config.mAudioFile.getName());
                     mPlayer = new MediaPlayer();
                     try {
                         mPlayer.setDataSource(config.mAudioFile.getAbsolutePath());
-                        setMediaPlayerListener(singleSubscriber);
+                        setMediaPlayerListener(subscriber);
                         mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
                         mPlayer.setLooping(config.mLooping);
                         mPlayer.prepare();
-                        singleSubscriber.onNext(true);
-//                        mPlayer.start();
+                        subscriber.onNext(true);
                     } catch (IllegalArgumentException | IOException e) {
                         Log.w(TAG, "startPlay fail, IllegalArgumentException: " + e.getMessage());
                         stopPlay();
-                        singleSubscriber.onError(e);
+                        subscriber.onError(e);
                     }
                 }
             });
@@ -172,21 +171,21 @@ public final class RxAudioPlayer {
                 config.mContext != null) {
             return Observable.create(new Observable.OnSubscribe<Boolean>() {
                 @Override
-                public void call(final Subscriber<? super Boolean> singleSubscriber) {
+                public void call(final Subscriber<? super Boolean> subscriber) {
                     stopPlay();
 
                     Log.d(TAG, "MediaPlayer to start play: " + config.mAudioResource);
                     mPlayer = MediaPlayer.create(config.mContext, config.mAudioResource);
                     try {
-                        setMediaPlayerListener(singleSubscriber);
+                        setMediaPlayerListener(subscriber);
                         mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
                         mPlayer.setLooping(config.mLooping);
-                        singleSubscriber.onNext(true);
+                        subscriber.onNext(true);
 //                        mPlayer.start();
                     } catch (IllegalArgumentException e) {
                         Log.w(TAG, "startPlay fail, IllegalArgumentException: " + e.getMessage());
                         stopPlay();
-                        singleSubscriber.onError(e);
+                        subscriber.onError(e);
                     }
                 }
             });
@@ -203,7 +202,7 @@ public final class RxAudioPlayer {
         mPlayer.start();
     }
 
-    void setMediaPlayerListener(final Subscriber<? super Boolean> singleSubscriber) {
+    void setMediaPlayerListener(final Subscriber<? super Boolean> subscriber) {
         mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -216,12 +215,12 @@ public final class RxAudioPlayer {
                     @Override
                     public void call(Long aLong) {
                         stopPlay();
-                        singleSubscriber.onCompleted(/*true*/);
+                        subscriber.onCompleted();
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        singleSubscriber.onError(throwable);
+                        subscriber.onError(throwable);
                     }
                 });
             }
@@ -230,7 +229,7 @@ public final class RxAudioPlayer {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
                 Log.d(TAG, "OnErrorListener::onError" + what + ", " + extra);
-                singleSubscriber.onError(new Throwable("Player error: " + what + ", " +
+                subscriber.onError(new Throwable("Player error: " + what + ", " +
                         extra));
                 stopPlay();
                 return true;
