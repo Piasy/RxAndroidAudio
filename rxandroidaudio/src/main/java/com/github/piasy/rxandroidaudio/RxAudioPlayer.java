@@ -108,7 +108,6 @@ public final class RxAudioPlayer {
                     } catch (IllegalArgumentException | IOException e) {
                         Log.w(TAG, "startPlay fail, IllegalArgumentException: " + e.getMessage());
                         stopPlay();
-                        singleSubscriber.onError(new IllegalArgumentException(""));
                         singleSubscriber.onError(e);
                     }
                 }
@@ -131,7 +130,6 @@ public final class RxAudioPlayer {
                     } catch (IllegalArgumentException e) {
                         Log.w(TAG, "startPlay fail, IllegalArgumentException: " + e.getMessage());
                         stopPlay();
-                        singleSubscriber.onError(new IllegalArgumentException(""));
                         singleSubscriber.onError(e);
                     }
                 }
@@ -166,7 +164,6 @@ public final class RxAudioPlayer {
                     } catch (IllegalArgumentException | IOException e) {
                         Log.w(TAG, "startPlay fail, IllegalArgumentException: " + e.getMessage());
                         stopPlay();
-                        singleSubscriber.onError(new IllegalArgumentException(""));
                         singleSubscriber.onError(e);
                     }
                 }
@@ -189,7 +186,6 @@ public final class RxAudioPlayer {
                     } catch (IllegalArgumentException e) {
                         Log.w(TAG, "startPlay fail, IllegalArgumentException: " + e.getMessage());
                         stopPlay();
-                        singleSubscriber.onError(new IllegalArgumentException(""));
                         singleSubscriber.onError(e);
                     }
                 }
