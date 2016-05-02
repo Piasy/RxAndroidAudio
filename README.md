@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.piasy:rxandroidaudio:1.2.2'
+    compile 'com.github.piasy:rxandroidaudio:1.3.0'
 }
 ```
 
@@ -131,9 +131,6 @@ Observable.just(mOutputFile).subscribeOn(Schedulers.io()).subscribe(new Action1<
 See [full example](https://github.com/Piasy/RxAndroidAudio/tree/master/app) for more details.
 
 [Download demo apk](https://www.pgyer.com/rsyU).
-
-## Dev tips
-+  You need create an empty file named `bintray.properties` under root project dir, which is used for uploading artifact to bintray.
 
 ## Contribution
 +  Please follow [my code style based on SquareAndroid](https://github.com/Piasy/java-code-styles)

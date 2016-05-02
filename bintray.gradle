@@ -92,7 +92,9 @@ artifacts {
 Properties properties = new Properties()
 // for wrapper project structure
 File propertyFile = project.rootProject.file('bintray.properties')
-properties.load(propertyFile.newDataInputStream())
+if (propertyFile.exists()) {
+    properties.load(propertyFile.newDataInputStream())
+}
 
 bintray {
     user = properties.getProperty("bintray.user")
