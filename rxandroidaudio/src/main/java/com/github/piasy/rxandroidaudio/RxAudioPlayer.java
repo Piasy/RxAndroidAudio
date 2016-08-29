@@ -47,7 +47,7 @@ public final class RxAudioPlayer {
 
     static final String TAG = "RxAudioPlayer";
 
-    MediaPlayer mPlayer;
+    private MediaPlayer mPlayer;
 
     private RxAudioPlayer() {
         // singleton
@@ -363,6 +363,10 @@ public final class RxAudioPlayer {
         }
         mPlayer = null;
         return true;
+    }
+
+    public MediaPlayer getMediaPlayer() {
+        return mPlayer;
     }
 
     private static class RxAudioPlayerHolder {
