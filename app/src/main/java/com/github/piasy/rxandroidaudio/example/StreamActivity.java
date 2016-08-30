@@ -30,7 +30,7 @@ import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
 import android.widget.Toast;
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.github.piasy.rxandroidaudio.StreamAudioPlayer;
@@ -48,7 +48,7 @@ public class StreamActivity extends AppCompatActivity {
 
     static final int BUFFER_SIZE = 2048;
     byte[] mBuffer;
-    @Bind(R.id.mBtnStart)
+    @BindView(R.id.mBtnStart)
     Button mBtnStart;
     private StreamAudioRecorder mStreamAudioRecorder;
     private StreamAudioPlayer mStreamAudioPlayer;
@@ -75,9 +75,9 @@ public class StreamActivity extends AppCompatActivity {
             mIsRecording = false;
         } else {
             boolean isPermissionsGranted = RxPermissions.getInstance(getApplicationContext())
-                    .isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE) &&
-                    RxPermissions.getInstance(getApplicationContext())
-                            .isGranted(Manifest.permission.RECORD_AUDIO);
+                    .isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    && RxPermissions.getInstance(getApplicationContext())
+                    .isGranted(Manifest.permission.RECORD_AUDIO);
             if (!isPermissionsGranted) {
                 RxPermissions.getInstance(getApplicationContext())
                         .request(Manifest.permission.WRITE_EXTERNAL_STORAGE,

@@ -24,13 +24,6 @@
 
 package com.github.piasy.rxandroidaudio.example;
 
-import com.github.piasy.rxandroidaudio.AudioRecorder;
-import com.github.piasy.rxandroidaudio.PlayConfig;
-import com.github.piasy.rxandroidaudio.RxAmplitude;
-import com.github.piasy.rxandroidaudio.RxAudioPlayer;
-import com.tbruyelle.rxpermissions.RxPermissions;
-import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
-
 import android.Manifest;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -42,16 +35,20 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import com.github.piasy.rxandroidaudio.AudioRecorder;
+import com.github.piasy.rxandroidaudio.PlayConfig;
+import com.github.piasy.rxandroidaudio.RxAmplitude;
+import com.github.piasy.rxandroidaudio.RxAudioPlayer;
+import com.tbruyelle.rxpermissions.RxPermissions;
+import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-
-import butterknife.Bind;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import rx.Observable;
 import rx.Single;
 import rx.Subscription;
@@ -82,16 +79,16 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
         }
     };
 
-    @Bind(R.id.mFlIndicator)
+    @BindView(R.id.mFlIndicator)
     FrameLayout mFlIndicator;
 
-    @Bind(R.id.mTvPressToSay)
+    @BindView(R.id.mTvPressToSay)
     TextView mTvPressToSay;
 
-    @Bind(R.id.mTvLog)
+    @BindView(R.id.mTvLog)
     TextView mTvLog;
 
-    @Bind(R.id.mTvRecordingHint)
+    @BindView(R.id.mTvRecordingHint)
     TextView mTvRecordingHint;
 
     List<ImageView> mIvVoiceIndicators;
@@ -160,9 +157,8 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
         mTvRecordingHint.setText(R.string.voice_msg_input_hint_speaking);
 
         boolean isPermissionsGranted = RxPermissions.getInstance(getApplicationContext())
-                .isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE) &&
-                RxPermissions.getInstance(getApplicationContext())
-                        .isGranted(Manifest.permission.RECORD_AUDIO);
+                .isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE) && RxPermissions.getInstance(
+                getApplicationContext()).isGranted(Manifest.permission.RECORD_AUDIO);
         if (!isPermissionsGranted) {
             RxPermissions.getInstance(getApplicationContext())
                     .request(Manifest.permission.WRITE_EXTERNAL_STORAGE,

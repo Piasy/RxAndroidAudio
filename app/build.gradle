@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.ofg.uptodate'
+apply plugin: 'android-apt'
 
 android {
     compileSdkVersion rootProject.ext.androidCompileSdkVersion
@@ -23,16 +25,17 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile "com.android.support:appcompat-v7:${rootProject.ext.androidSupportSdkVersion}"
 
     compile project(':rxandroidaudio')
-    compile 'com.jakewharton:butterknife:7.0.1'
-    compile ('io.reactivex:rxandroid:1.1.0') {
+    compile 'com.jakewharton:butterknife:8.4.0'
+    apt 'com.jakewharton:butterknife-compiler:8.4.0'
+    compile ('io.reactivex:rxandroid:1.2.1') {
         exclude module: 'rxjava'
     }
-    compile 'com.tbruyelle.rxpermissions:rxpermissions:0.5.2@aar'
+    compile 'com.tbruyelle.rxpermissions:rxpermissions:0.7.0@aar'
     compile 'com.jakewharton.rxbinding:rxbinding:0.4.0'
     compile 'com.jakewharton.rxbinding:rxbinding-appcompat-v7:0.4.0'
-    compile 'com.trello:rxlifecycle:0.4.0'
-    compile 'com.trello:rxlifecycle-components:0.4.0'
+    compile 'com.trello:rxlifecycle:0.7.0'
+    compile 'com.trello:rxlifecycle-components:0.7.0'
 }

@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply from: "${rootProject.rootDir}/bintray.gradle"
+apply plugin: 'com.ofg.uptodate'
 
 android {
     compileSdkVersion rootProject.ext.androidCompileSdkVersion
@@ -22,5 +23,5 @@ android {
 
 dependencies {
     compile "com.android.support:support-annotations:${rootProject.ext.androidSupportSdkVersion}"
-    compile 'io.reactivex:rxjava:1.1.0'
+    compile 'io.reactivex:rxjava:1.1.9'
 }
