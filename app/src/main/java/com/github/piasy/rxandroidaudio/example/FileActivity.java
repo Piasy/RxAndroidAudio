@@ -25,6 +25,7 @@
 package com.github.piasy.rxandroidaudio.example;
 
 import android.Manifest;
+import android.media.AudioManager;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -350,7 +351,8 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
         mTvLog.setText("");
         if (!mAudioFiles.isEmpty()) {
             File audioFile = mAudioFiles.poll();
-            mRxAudioPlayer.play(PlayConfig.file(audioFile).build())
+            mRxAudioPlayer.play(
+                    PlayConfig.file(audioFile).streamType(AudioManager.STREAM_VOICE_CALL).build())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Action1<Boolean>() {

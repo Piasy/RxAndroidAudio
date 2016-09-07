@@ -1,6 +1,7 @@
 package com.github.piasy.rxandroidaudio;
 
 import android.content.Context;
+import android.media.AudioManager;
 import android.support.annotation.FloatRange;
 import android.support.annotation.IntDef;
 import android.support.annotation.RawRes;
@@ -14,7 +15,8 @@ public class PlayConfig {
     static final int TYPE_RES = 2;
 
     @IntDef(value = { TYPE_FILE, TYPE_RES })
-    public @interface Type {}
+    public @interface Type {
+    }
 
     @PlayConfig.Type
     final int mType;
@@ -26,6 +28,8 @@ public class PlayConfig {
 
     final File mAudioFile;
 
+    final int mStreamType;
+
     final boolean mLooping;
 
     @FloatRange(from = 0.0F, to = 1.0F)
@@ -34,17 +38,16 @@ public class PlayConfig {
     @FloatRange(from = 0.0F, to = 1.0F)
     final float mRightVolume;
 
-    private PlayConfig(int type, Context context, int audioResource, File audioFile,
-            boolean looping, float leftVolume, float rightVolume) {
-        mType = type;
-        mContext = context;
-        mAudioResource = audioResource;
-        mAudioFile = audioFile;
-        mLooping = looping;
-        mLeftVolume = leftVolume;
-        mRightVolume = rightVolume;
+    private PlayConfig(Builder builder) {
+        mType = builder.mType;
+        mContext = builder.mContext;
+        mAudioResource = builder.mAudioResource;
+        mAudioFile = builder.mAudioFile;
+        mStreamType = builder.mStreamType;
+        mLooping = builder.mLooping;
+        mLeftVolume = builder.mLeftVolume;
+        mRightVolume = builder.mRightVolume;
     }
-
 
     public static Builder file(File file) {
         Builder builder = new Builder();
@@ -61,7 +64,6 @@ public class PlayConfig {
         return builder;
     }
 
-
     public static class Builder {
 
         @PlayConfig.Type
@@ -74,6 +76,8 @@ public class PlayConfig {
 
         File mAudioFile;
 
+        int mStreamType = AudioManager.STREAM_MUSIC;
+
         boolean mLooping;
 
         @FloatRange(from = 0.0F, to = 1.0F)
@@ -81,6 +85,14 @@ public class PlayConfig {
 
         @FloatRange(from = 0.0F, to = 1.0F)
         float mRightVolume = 1.0F;
+
+        /**
+         * {@link AudioManager.STREAM_VOICE_CALL} etc.
+         */
+        public Builder streamType(int streamType) {
+            mStreamType = streamType;
+            return this;
+        }
 
         public Builder looping(boolean looping) {
             mLooping = looping;
@@ -98,8 +110,7 @@ public class PlayConfig {
         }
 
         public PlayConfig build() {
-            return new PlayConfig(mType, mContext, mAudioResource, mAudioFile, mLooping,
-                    mLeftVolume, mRightVolume);
+            return new PlayConfig(this);
         }
     }
 }

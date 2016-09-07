@@ -99,6 +99,7 @@ public final class RxAudioPlayer {
                         mPlayer.setDataSource(config.mAudioFile.getAbsolutePath());
                         setMediaPlayerListener(singleSubscriber);
                         mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
+                        mPlayer.setAudioStreamType(config.mStreamType);
                         mPlayer.setLooping(config.mLooping);
                         mPlayer.prepare();
                         mPlayer.start();
@@ -217,6 +218,7 @@ public final class RxAudioPlayer {
                 mPlayer.setDataSource(config.mAudioFile.getAbsolutePath());
                 setMediaPlayerListener(onCompletionListener, onErrorListener);
                 mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
+                mPlayer.setAudioStreamType(config.mStreamType);
                 mPlayer.setLooping(config.mLooping);
                 mPlayer.prepare();
                 mPlayer.start();
