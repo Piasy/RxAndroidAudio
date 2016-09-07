@@ -54,14 +54,19 @@ public final class StreamAudioPlayer {
     }
 
     public synchronized void init() {
-        init(DEFAULT_SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
+        init(DEFAULT_SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT,
+                StreamAudioRecorder.DEFAULT_BUFFER_SIZE);
     }
 
     /**
      * AudioFormat.CHANNEL_OUT_MONO
      * AudioFormat.ENCODING_PCM_16BIT
+     *
+     * @param bufferSize user may want to write data larger than minBufferSize, so they should able
+     * to increase it
      */
-    public synchronized void init(int sampleRate, int channelConfig, int audioFormat) {
+    public synchronized void init(int sampleRate, int channelConfig, int audioFormat,
+            int bufferSize) {
         if (mAudioTrack != null) {
             mAudioTrack.release();
             mAudioTrack = null;
@@ -69,7 +74,7 @@ public final class StreamAudioPlayer {
         int minBufferSize = AudioTrack.getMinBufferSize(sampleRate, channelConfig, audioFormat);
         mAudioTrack =
                 new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, channelConfig, audioFormat,
-                        minBufferSize, AudioTrack.MODE_STREAM);
+                        Math.max(minBufferSize, bufferSize), AudioTrack.MODE_STREAM);
         mAudioTrack.play();
     }
 
