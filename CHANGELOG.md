@@ -1,5 +1,8 @@
 ## Change log
 
++ v1.4.0
+  + Allow play from url
+  + Add AudioProcessor
 + v1.2.5
   + Add buffer size option for StreamAudioPlayer
 + v1.2.4

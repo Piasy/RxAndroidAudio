@@ -8,4 +8,4 @@
 .idea/
 
 bintray.properties
-gradle.properties
+**/.externalNativeBuild

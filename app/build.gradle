@@ -1,6 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.ofg.uptodate'
-apply plugin: 'android-apt'
 
 android {
     compileSdkVersion rootProject.ext.androidCompileSdkVersion
@@ -23,13 +21,12 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
     compile "com.android.support:appcompat-v7:${rootProject.ext.androidSupportSdkVersion}"
 
     compile project(':rxandroidaudio')
+    compile project(':AudioProcessor')
     compile 'com.jakewharton:butterknife:8.4.0'
-    apt 'com.jakewharton:butterknife-compiler:8.4.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
     compile ('io.reactivex:rxandroid:1.2.1') {
         exclude module: 'rxjava'
     }

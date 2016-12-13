@@ -47,4 +47,31 @@
             android:layout_height="wrap_content"
             android:text="play"
             />
+
+    <Button
+            android:id="@+id/mBtnPlayChanged"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="play changed"
+            />
+
+    <SeekBar
+            android:id="@+id/mRatio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:max="200"
+            android:progress="100"
+            />
+
+    <TextView
+            android:id="@+id/mRatioValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="30dp"
+            android:text="1.0"
+            />
+
 </LinearLayout>

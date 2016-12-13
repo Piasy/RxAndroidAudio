@@ -8,20 +8,18 @@ Android Audio encapsulation library, with part Rx support.
 ### Add to gradle dependency of your module build.gradle:
 
 ```gradle
-repositories {
-    jcenter()
+allprojects {
+    repositories {
+        maven {
+            url  "http://dl.bintray.com/piasy/maven"
+        }
+    }
 }
 
 dependencies {
-    compile 'com.github.piasy:rxandroidaudio:1.2.5'
+    compile 'com.github.piasy:rxandroidaudio:1.4.0'
+    compile 'com.github.piasy:AudioProcessor:1.4.0'
 }
-```
-
-### Declare permissions:
-
-```xml
-<uses-permission android:name="android.permission.RECORD_AUDIO"/>
-<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 ```
 
 ### Use in code:
@@ -128,12 +126,17 @@ Observable.just(mOutputFile).subscribeOn(Schedulers.io()).subscribe(new Action1<
 });
 ```
 
+#### Change the sound effect in stream mode:
+
+``` java
+mStreamAudioPlayer.play(
+    mAudioProcessor.process(mRatio, mBuffer, StreamAudioRecorder.DEFAULT_SAMPLE_RATE),
+    len);
+```
+
 See [full example](https://github.com/Piasy/RxAndroidAudio/tree/master/app) for more details.
 
-[Download demo apk](https://www.pgyer.com/rsyU).
+[Download demo apk](http://fir.im/RXA).
 
-## Dev tips
-+  You need create an empty file named `bintray.properties` under root project dir, which is used for uploading artifact to bintray.
-
-## Contribution
+## Contribution are welcome!
 +  Please follow [my code style based on SquareAndroid](https://github.com/Piasy/java-code-styles)

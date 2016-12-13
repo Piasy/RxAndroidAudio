@@ -7,8 +7,6 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:2.2.3'
 
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
-        classpath 'com.ofg:uptodate-gradle-plugin:1.6.2'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
         classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.1"
     }
@@ -26,16 +24,27 @@ task clean(type: Delete) {
 }
 
 ext {
+    userName = 'Piasy'
+    developer = [
+            id   : 'piasy',
+            name : 'piasy',
+            email: 'xz4215@gmail.com'
+    ]
+    license = [
+            id  : 'MIT',
+            name: 'The MIT License (MIT)',
+            url : 'http://opensource.org/licenses/MIT'
+    ]
     groupName = 'com.github.piasy'
     artifactName = 'RxAndroidAudio'
     artifactDescription = 'Android Audio encapsulation library, with part Rx support.'
     artifactLabels = ['rx', 'android', 'audio']
-    releaseVersionCode = 10
-    releaseVersionName = '1.2.5'
+    releaseVersionCode = 11
+    releaseVersionName = '1.4.0'
 
-    androidCompileSdkVersion = 24
-    androidBuildToolsVersion = '24.0.1'
-    androidSupportSdkVersion = '24.2.0'
+    androidCompileSdkVersion = 25
+    androidBuildToolsVersion = '25.0.2'
+    androidSupportSdkVersion = '25.0.1'
     minSdkVersion = 14
-    targetSdkVersion = 24
+    targetSdkVersion = 25
 }

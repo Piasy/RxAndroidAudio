@@ -40,24 +40,53 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <em>NOTE: users should only have one instance active at the same time.</em>
  */
 public final class StreamAudioRecorder {
-    private static final String TAG = "StreamAudioRecorder";
     public static final int DEFAULT_SAMPLE_RATE = 44100;
     public static final int DEFAULT_BUFFER_SIZE = 2048;
 
+    private static final String TAG = "StreamAudioRecorder";
+
+    private final AtomicBoolean mIsRecording;
     private ExecutorService mExecutorService;
-    final AtomicBoolean mIsRecording;
 
     private StreamAudioRecorder() {
         // singleton
         mIsRecording = new AtomicBoolean(false);
     }
 
-    private static final class StreamAudioRecorderHolder {
-        private static final StreamAudioRecorder INSTANCE = new StreamAudioRecorder();
-    }
-
     public static StreamAudioRecorder getInstance() {
         return StreamAudioRecorderHolder.INSTANCE;
+    }
+
+    public synchronized boolean start(@NonNull AudioDataCallback audioDataCallback) {
+        return start(DEFAULT_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO,
+                AudioFormat.ENCODING_PCM_16BIT, DEFAULT_BUFFER_SIZE, audioDataCallback);
+    }
+
+    /**
+     * AudioFormat.CHANNEL_IN_MONO
+     * AudioFormat.ENCODING_PCM_16BIT
+     */
+    public synchronized boolean start(int sampleRate, int channelConfig, int audioFormat,
+            int bufferSize, @NonNull AudioDataCallback audioDataCallback) {
+        stop();
+
+        mExecutorService = Executors.newSingleThreadExecutor();
+        if (mIsRecording.compareAndSet(false, true)) {
+            mExecutorService.execute(
+                    new AudioRecordRunnable(sampleRate, channelConfig, audioFormat, bufferSize,
+                            audioDataCallback));
+            return true;
+        }
+        return false;
+    }
+
+    public synchronized void stop() {
+        mIsRecording.compareAndSet(true, false);
+
+        if (mExecutorService != null) {
+            mExecutorService.shutdown();
+            mExecutorService = null;
+        }
     }
 
     /**
@@ -70,6 +99,10 @@ public final class StreamAudioRecorder {
         void onAudioData(byte[] data, int size);
 
         void onError();
+    }
+
+    private static final class StreamAudioRecorderHolder {
+        private static final StreamAudioRecorder INSTANCE = new StreamAudioRecorder();
     }
 
     private class AudioRecordRunnable implements Runnable {
@@ -151,38 +184,6 @@ public final class StreamAudioRecorder {
                 Log.w(TAG, "record fail: ERROR_BAD_VALUE");
                 mAudioDataCallback.onError();
             }
-        }
-    }
-
-    public synchronized boolean start(@NonNull AudioDataCallback audioDataCallback) {
-        return start(DEFAULT_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT, DEFAULT_BUFFER_SIZE, audioDataCallback);
-    }
-
-    /**
-     * AudioFormat.CHANNEL_IN_MONO
-     * AudioFormat.ENCODING_PCM_16BIT
-     */
-    public synchronized boolean start(int sampleRate, int channelConfig, int audioFormat,
-            int bufferSize, @NonNull AudioDataCallback audioDataCallback) {
-        stop();
-
-        mExecutorService = Executors.newSingleThreadExecutor();
-        if (mIsRecording.compareAndSet(false, true)) {
-            mExecutorService.execute(
-                    new AudioRecordRunnable(sampleRate, channelConfig, audioFormat, bufferSize,
-                            audioDataCallback));
-            return true;
-        }
-        return false;
-    }
-
-    public synchronized void stop() {
-        mIsRecording.compareAndSet(true, false);
-
-        if (mExecutorService != null) {
-            mExecutorService.shutdown();
-            mExecutorService = null;
         }
     }
 }

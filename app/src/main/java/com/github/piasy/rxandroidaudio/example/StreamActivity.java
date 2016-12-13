@@ -29,10 +29,13 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import com.github.piasy.audioprocessor.AudioProcessor;
 import com.github.piasy.rxandroidaudio.StreamAudioPlayer;
 import com.github.piasy.rxandroidaudio.StreamAudioRecorder;
 import com.tbruyelle.rxpermissions.RxPermissions;
@@ -47,14 +50,22 @@ import rx.schedulers.Schedulers;
 public class StreamActivity extends AppCompatActivity {
 
     static final int BUFFER_SIZE = 2048;
-    byte[] mBuffer;
+
     @BindView(R.id.mBtnStart)
     Button mBtnStart;
+    @BindView(R.id.mRatio)
+    SeekBar mRatioBar;
+    @BindView(R.id.mRatioValue)
+    TextView mRatioValue;
+
+    private byte[] mBuffer;
     private StreamAudioRecorder mStreamAudioRecorder;
     private StreamAudioPlayer mStreamAudioPlayer;
+    private AudioProcessor mAudioProcessor;
     private FileOutputStream mFileOutputStream;
     private File mOutputFile;
     private boolean mIsRecording = false;
+    private float mRatio = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +73,25 @@ public class StreamActivity extends AppCompatActivity {
         setContentView(R.layout.activity_stream);
         ButterKnife.bind(this);
 
+        mRatioBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                mRatio = (float) progress / 100;
+                mRatioValue.setText(String.valueOf(mRatio));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+
         mStreamAudioRecorder = StreamAudioRecorder.getInstance();
         mStreamAudioPlayer = StreamAudioPlayer.getInstance();
+        mAudioProcessor = new AudioProcessor(BUFFER_SIZE);
         mBuffer = new byte[BUFFER_SIZE];
     }
 
@@ -75,9 +103,11 @@ public class StreamActivity extends AppCompatActivity {
             mIsRecording = false;
         } else {
             boolean isPermissionsGranted = RxPermissions.getInstance(getApplicationContext())
-                    .isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    && RxPermissions.getInstance(getApplicationContext())
-                    .isGranted(Manifest.permission.RECORD_AUDIO);
+                                                   .isGranted(
+                                                           Manifest.permission
+                                                                   .WRITE_EXTERNAL_STORAGE)
+                                           && RxPermissions.getInstance(getApplicationContext())
+                                                   .isGranted(Manifest.permission.RECORD_AUDIO);
             if (!isPermissionsGranted) {
                 RxPermissions.getInstance(getApplicationContext())
                         .request(Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -111,7 +141,7 @@ public class StreamActivity extends AppCompatActivity {
     private void startRecord() {
         try {
             mOutputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
-                    File.separator + System.nanoTime() + ".stream.m4a");
+                                   File.separator + System.nanoTime() + ".stream.m4a");
             mOutputFile.createNewFile();
             mFileOutputStream = new FileOutputStream(mOutputFile);
             mStreamAudioRecorder.start(new StreamAudioRecorder.AudioDataCallback() {
@@ -165,6 +195,36 @@ public class StreamActivity extends AppCompatActivity {
                     int read;
                     while ((read = inputStream.read(mBuffer)) > 0) {
                         mStreamAudioPlayer.play(mBuffer, read);
+                    }
+                    inputStream.close();
+                    mStreamAudioPlayer.release();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
+    }
+
+    @OnClick(R.id.mBtnPlayChanged)
+    public void playChanged() {
+        Observable.just(mOutputFile).subscribeOn(Schedulers.io()).subscribe(new Action1<File>() {
+            @Override
+            public void call(File file) {
+                try {
+                    mStreamAudioPlayer.init();
+                    FileInputStream inputStream = new FileInputStream(file);
+                    int read;
+                    while ((read = inputStream.read(mBuffer)) > 0) {
+                        mStreamAudioPlayer.play(mRatio == 1
+                                        ? mBuffer
+                                        : mAudioProcessor.process(mRatio, mBuffer,
+                                                StreamAudioRecorder.DEFAULT_SAMPLE_RATE),
+                                read);
                     }
                     inputStream.close();
                     mStreamAudioPlayer.release();
