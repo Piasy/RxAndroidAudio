@@ -30,7 +30,7 @@ public class PlayConfig {
 
     final File mAudioFile;
 
-    final String url;
+    final String mUrl;
 
     final int mStreamType;
 
@@ -51,7 +51,7 @@ public class PlayConfig {
         mLooping = builder.mLooping;
         mLeftVolume = builder.mLeftVolume;
         mRightVolume = builder.mRightVolume;
-        url = builder.url;
+        mUrl = builder.url;
     }
 
     public static Builder file(File file) {
