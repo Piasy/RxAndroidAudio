@@ -5,6 +5,7 @@ import android.media.AudioManager;
 import android.support.annotation.FloatRange;
 import android.support.annotation.IntDef;
 import android.support.annotation.RawRes;
+
 import java.io.File;
 
 /**
@@ -13,8 +14,9 @@ import java.io.File;
 public class PlayConfig {
     static final int TYPE_FILE = 1;
     static final int TYPE_RES = 2;
+    static final int TYPE_URL = 3;
 
-    @IntDef(value = { TYPE_FILE, TYPE_RES })
+    @IntDef(value = {TYPE_FILE, TYPE_RES,TYPE_URL})
     public @interface Type {
     }
 
@@ -27,6 +29,8 @@ public class PlayConfig {
     final int mAudioResource;
 
     final File mAudioFile;
+
+    final String mUrl;
 
     final int mStreamType;
 
@@ -47,12 +51,20 @@ public class PlayConfig {
         mLooping = builder.mLooping;
         mLeftVolume = builder.mLeftVolume;
         mRightVolume = builder.mRightVolume;
+        mUrl = builder.mUrl;
     }
 
     public static Builder file(File file) {
         Builder builder = new Builder();
         builder.mAudioFile = file;
         builder.mType = TYPE_FILE;
+        return builder;
+    }
+
+    public static Builder url(String url) {
+        Builder builder = new Builder();
+        builder.mUrl = url;
+        builder.mType = TYPE_URL;
         return builder;
     }
 
@@ -75,6 +87,8 @@ public class PlayConfig {
         int mAudioResource;
 
         File mAudioFile;
+
+        String mUrl;
 
         int mStreamType = AudioManager.STREAM_MUSIC;
 
