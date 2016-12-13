@@ -5,8 +5,10 @@ import android.media.AudioManager;
 import android.support.annotation.FloatRange;
 import android.support.annotation.IntDef;
 import android.support.annotation.RawRes;
-
+import android.text.TextUtils;
 import java.io.File;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Created by Piasy{github.com/Piasy} on 16/4/11.
@@ -15,10 +17,6 @@ public class PlayConfig {
     static final int TYPE_FILE = 1;
     static final int TYPE_RES = 2;
     static final int TYPE_URL = 3;
-
-    @IntDef(value = {TYPE_FILE, TYPE_RES,TYPE_URL})
-    public @interface Type {
-    }
 
     @PlayConfig.Type
     final int mType;
@@ -74,6 +72,24 @@ public class PlayConfig {
         builder.mAudioResource = audioResource;
         builder.mType = TYPE_RES;
         return builder;
+    }
+
+    public boolean isArgumentValid() {
+        switch (mType) {
+            case TYPE_FILE:
+                return mAudioFile != null && mAudioFile.exists();
+            case TYPE_RES:
+                return mAudioResource > 0 && mContext != null;
+            case TYPE_URL:
+                return !TextUtils.isEmpty(mUrl);
+            default:
+                return false;
+        }
+    }
+
+    @IntDef(value = { TYPE_FILE, TYPE_RES, TYPE_URL })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Type {
     }
 
     public static class Builder {

@@ -30,6 +30,8 @@ import android.support.annotation.WorkerThread;
 import android.util.Log;
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Encapsulate {@link MediaRecorder},
@@ -44,44 +46,30 @@ import java.io.IOException;
  * </em>
  */
 public final class AudioRecorder {
-    private static final String TAG = "AudioRecorder";
-
-    private static final int STOP_AUDIO_RECORD_DELAY_MILLIS = 300;
     public static final int DEFAULT_SAMPLE_RATE = 44100;
     public static final int DEFAULT_BIT_RATE = 44100;
+    public static final int ERROR_SDCARD_ACCESS = 1;
+    public static final int ERROR_INTERNAL = 2;
+    public static final int ERROR_NOT_PREPARED = 3;
 
-    private AudioRecorder() {
-        // singleton
-    }
-
-    private static class RxAndroidAudioHolder {
-        private static final AudioRecorder INSTANCE = new AudioRecorder();
-    }
-
-    public static AudioRecorder getInstance() {
-        return RxAndroidAudioHolder.INSTANCE;
-    }
-
+    private static final String TAG = "AudioRecorder";
+    private static final int STOP_AUDIO_RECORD_DELAY_MILLIS = 300;
     private static final int STATE_IDLE = 0;
     private static final int STATE_PREPARED = 1;
     private static final int STATE_RECORDING = 2;
 
     private int mState = STATE_IDLE;
-
-    public static final int ERROR_SDCARD_ACCESS = 1;
-    public static final int ERROR_INTERNAL = 2;
-    public static final int ERROR_NOT_PREPARED = 3;
-
-    @IntDef(value = { ERROR_SDCARD_ACCESS, ERROR_INTERNAL, ERROR_NOT_PREPARED })
-    public @interface Error {
-
-    }
-
-    public interface OnErrorListener {
-        void onError(@Error int error);
-    }
-
     private OnErrorListener mOnErrorListener;
+    private long mSampleStart = 0;       // time at which latest record or play operation started
+    private MediaRecorder mRecorder;
+
+    private AudioRecorder() {
+        // singleton
+    }
+
+    public static AudioRecorder getInstance() {
+        return RxAndroidAudioHolder.INSTANCE;
+    }
 
     public void setOnErrorListener(OnErrorListener listener) {
         mOnErrorListener = listener;
@@ -93,10 +81,6 @@ public final class AudioRecorder {
         }
         return mRecorder.getMaxAmplitude();
     }
-
-    private long mSampleStart = 0;       // time at which latest record or play operation started
-
-    private MediaRecorder mRecorder;
 
     public int progress() {
         if (mState == STATE_RECORDING) {
@@ -241,7 +225,7 @@ public final class AudioRecorder {
                     length = (int) ((System.currentTimeMillis() - mSampleStart) / 1000);
                 } catch (RuntimeException e) {
                     Log.w(TAG, "stopRecord fail, stop fail(no audio data recorded): " +
-                            e.getMessage());
+                               e.getMessage());
                 } catch (InterruptedException e) {
                     Log.w(TAG,
                             "stopRecord fail, stop fail(InterruptedException): " + e.getMessage());
@@ -270,5 +254,18 @@ public final class AudioRecorder {
         if (mOnErrorListener != null) {
             mOnErrorListener.onError(error);
         }
+    }
+
+    @IntDef(value = { ERROR_SDCARD_ACCESS, ERROR_INTERNAL, ERROR_NOT_PREPARED })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Error {
+    }
+
+    public interface OnErrorListener {
+        void onError(@Error int error);
+    }
+
+    private static class RxAndroidAudioHolder {
+        private static final AudioRecorder INSTANCE = new AudioRecorder();
     }
 }
