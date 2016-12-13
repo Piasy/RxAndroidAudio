@@ -51,7 +51,7 @@ public class PlayConfig {
         mLooping = builder.mLooping;
         mLeftVolume = builder.mLeftVolume;
         mRightVolume = builder.mRightVolume;
-        mUrl = builder.url;
+        mUrl = builder.mUrl;
     }
 
     public static Builder file(File file) {
@@ -63,7 +63,7 @@ public class PlayConfig {
 
     public static Builder url(String url) {
         Builder builder = new Builder();
-        builder.url = url;
+        builder.mUrl = url;
         builder.mType = TYPE_URL;
         return builder;
     }
@@ -88,7 +88,7 @@ public class PlayConfig {
 
         File mAudioFile;
 
-        String url;
+        String mUrl;
 
         int mStreamType = AudioManager.STREAM_MUSIC;
 
