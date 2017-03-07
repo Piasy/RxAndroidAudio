@@ -36,27 +36,31 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+
 import com.github.piasy.rxandroidaudio.AudioRecorder;
 import com.github.piasy.rxandroidaudio.PlayConfig;
 import com.github.piasy.rxandroidaudio.RxAmplitude;
 import com.github.piasy.rxandroidaudio.RxAudioPlayer;
-import com.tbruyelle.rxpermissions.RxPermissions;
-import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
+import com.tbruyelle.rxpermissions2.RxPermissions;
+import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import rx.Observable;
-import rx.Single;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import io.reactivex.ObservableSource;
+import io.reactivex.Single;
+import io.reactivex.SingleSource;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 
 public class FileActivity extends RxAppCompatActivity implements AudioRecorder.OnErrorListener {
 
@@ -100,7 +104,9 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
 
     private File mAudioFile;
 
-    private Subscription mRecordSubscription;
+    private Disposable mRecordDisposable;
+
+    private RxPermissions mPermissions;
 
     private Queue<File> mAudioFiles = new LinkedList<>();
 
@@ -109,6 +115,7 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file);
         ButterKnife.bind(this);
+        mPermissions = new RxPermissions(this);
 
         mIvVoiceIndicators = new ArrayList<>();
         mIvVoiceIndicators.add(ButterKnife.<ImageView>findById(this, R.id.mIvVoiceIndicator1));
@@ -157,16 +164,16 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
         mTvPressToSay.setBackgroundResource(R.drawable.button_press_to_say_pressed_bg);
         mTvRecordingHint.setText(R.string.voice_msg_input_hint_speaking);
 
-        boolean isPermissionsGranted = RxPermissions.getInstance(getApplicationContext())
-                .isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE) && RxPermissions.getInstance(
-                getApplicationContext()).isGranted(Manifest.permission.RECORD_AUDIO);
+        boolean isPermissionsGranted = mPermissions
+                .isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE) &&
+                mPermissions.isGranted(Manifest.permission.RECORD_AUDIO);
         if (!isPermissionsGranted) {
-            RxPermissions.getInstance(getApplicationContext())
+            mPermissions
                     .request(Manifest.permission.WRITE_EXTERNAL_STORAGE,
                             Manifest.permission.RECORD_AUDIO)
-                    .subscribe(new Action1<Boolean>() {
+                    .subscribe(new Consumer<Boolean>() {
                         @Override
-                        public void call(Boolean granted) {
+                        public void accept(Boolean granted) {
                             // not record first time to request permission
                             if (granted) {
                                 Toast.makeText(getApplicationContext(), "Permission granted",
@@ -176,9 +183,9 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
                                         Toast.LENGTH_SHORT).show();
                             }
                         }
-                    }, new Action1<Throwable>() {
+                    }, new Consumer<Throwable>() {
                         @Override
-                        public void call(Throwable throwable) {
+                        public void accept(Throwable throwable) {
                             throwable.printStackTrace();
                         }
                     });
@@ -188,26 +195,27 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
     }
 
     private void recordAfterPermissionGranted() {
-        mRecordSubscription = Single.just(true)
+        Single.just(true)
                 .subscribeOn(Schedulers.io())
-                .flatMap(new Func1<Boolean, Single<Boolean>>() {
+                .flatMap(new Function<Boolean, SingleSource<?>>() {
                     @Override
-                    public Single<Boolean> call(Boolean aBoolean) {
+                    public Single<Boolean> apply(Boolean aBoolean) {
                         Log.d(TAG, "to play audio_record_start: " + R.raw.audio_record_start);
                         return mRxAudioPlayer.play(
                                 PlayConfig.res(getApplicationContext(), R.raw.audio_record_start)
                                         .build());
                     }
                 })
-                .doOnSuccess(new Action1<Boolean>() {
+                .doOnSuccess(new Consumer<Object>() {
                     @Override
-                    public void call(Boolean aBoolean) {
+                    public void accept(Object o) throws Exception {
                         Log.d(TAG, "audio_record_start play finished");
+
                     }
                 })
-                .map(new Func1<Boolean, Boolean>() {
+                .map(new Function<Object, Object>() {
                     @Override
-                    public Boolean call(Boolean aBoolean) {
+                    public Boolean apply(Object ignored) {
                         mAudioFile = new File(
                                 Environment.getExternalStorageDirectory().getAbsolutePath() +
                                         File.separator + System.nanoTime() + ".file.m4a");
@@ -217,30 +225,30 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
                                 192000, 192000, mAudioFile);
                     }
                 })
-                .doOnSuccess(new Action1<Boolean>() {
+                .doOnSuccess(new Consumer<Object>() {
                     @Override
-                    public void call(Boolean aBoolean) {
+                    public void accept(Object ignored) {
                         Log.d(TAG, "prepareRecord success");
                     }
                 })
-                .flatMap(new Func1<Boolean, Single<Boolean>>() {
+                .flatMap(new Function<Object, SingleSource<Boolean>>() {
                     @Override
-                    public Single<Boolean> call(Boolean aBoolean) {
+                    public SingleSource<Boolean> apply(Object aBoolean) {
                         Log.d(TAG, "to play audio_record_ready: " + R.raw.audio_record_ready);
                         return mRxAudioPlayer.play(
                                 PlayConfig.res(getApplicationContext(), R.raw.audio_record_ready)
                                         .build());
                     }
                 })
-                .doOnSuccess(new Action1<Boolean>() {
+                .doOnSuccess(new Consumer<Boolean>() {
                     @Override
-                    public void call(Boolean aBoolean) {
+                    public void accept(Boolean aBoolean) {
                         Log.d(TAG, "audio_record_ready play finished");
                     }
                 })
-                .map(new Func1<Boolean, Boolean>() {
+                .map(new Function<Boolean, Object>() {
                     @Override
-                    public Boolean call(Boolean aBoolean) {
+                    public Boolean apply(Boolean aBoolean) {
                         // TODO why need delay?
                         mFlIndicator.postDelayed(new Runnable() {
                             @Override
@@ -251,24 +259,31 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
                         return mAudioRecorder.startRecord();
                     }
                 })
-                .doOnSuccess(new Action1<Boolean>() {
+                .doOnSuccess(new Consumer<Object>() {
                     @Override
-                    public void call(Boolean aBoolean) {
+                    public void accept(Object aBoolean) {
                         Log.d(TAG, "startRecord success");
                     }
                 })
                 .toObservable()
-                .flatMap(new Func1<Boolean, Observable<Integer>>() {
+                .flatMap(new Function<Object, ObservableSource<Integer>>() {
                     @Override
-                    public Observable<Integer> call(Boolean aBoolean) {
+                    public ObservableSource<Integer> apply(Object o) throws Exception {
                         return RxAmplitude.from(mAudioRecorder);
+
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread())
                 .compose(this.<Integer>bindToLifecycle())
-                .subscribe(new Action1<Integer>() {
+                .doOnSubscribe(new Consumer<Disposable>() {
                     @Override
-                    public void call(Integer level) {
+                    public void accept(Disposable disposable) throws Exception {
+                        mRecordDisposable = disposable;
+                    }
+                })
+                .subscribe(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer level) {
                         int progress = mAudioRecorder.progress();
                         Log.d(TAG, "amplitude: " + level + ", progress: " + progress);
 
@@ -283,9 +298,9 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
                             }
                         }
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         throwable.printStackTrace();
                     }
                 });
@@ -295,23 +310,23 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
         mTvPressToSay.setBackgroundResource(R.drawable.button_press_to_say_bg);
         mFlIndicator.setVisibility(View.GONE);
 
-        if (mRecordSubscription != null && !mRecordSubscription.isUnsubscribed()) {
-            mRecordSubscription.unsubscribe();
-            mRecordSubscription = null;
+        if (mRecordDisposable != null && !mRecordDisposable.isDisposed()) {
+            mRecordDisposable.dispose();
+            mRecordDisposable = null;
         }
 
         Log.d(TAG, "to play audio_record_end: " + R.raw.audio_record_end);
         mRxAudioPlayer.play(PlayConfig.res(getApplicationContext(), R.raw.audio_record_end).build())
-                .doOnSuccess(new Action1<Boolean>() {
+                .doOnSuccess(new Consumer<Boolean>() {
                     @Override
-                    public void call(Boolean aBoolean) {
+                    public void accept(Boolean aBoolean) {
                         Log.d(TAG, "audio_record_end play finished");
                     }
                 })
                 .subscribeOn(Schedulers.io())
-                .map(new Func1<Boolean, Boolean>() {
+                .map(new Function<Boolean, Boolean>() {
                     @Override
-                    public Boolean call(Boolean aBoolean) {
+                    public Boolean apply(Boolean aBoolean) {
                         int seconds = mAudioRecorder.stopRecord();
                         if (seconds >= MIN_AUDIO_LENGTH_SECONDS) {
                             mAudioFiles.offer(mAudioFile);
@@ -323,18 +338,18 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
                 .toObservable()
                 .observeOn(AndroidSchedulers.mainThread())
                 .compose(this.<Boolean>bindToLifecycle())
-                .subscribe(new Action1<Boolean>() {
+                .subscribe(new Consumer<Boolean>() {
                     @Override
-                    public void call(Boolean added) {
+                    public void accept(Boolean added) {
                         if (added) {
                             mTvLog.setText(
                                     mTvLog.getText() + "\n" + "audio file " + mAudioFile.getName() +
                                             " added");
                         }
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         throwable.printStackTrace();
                     }
                 });
@@ -355,14 +370,14 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
                     PlayConfig.file(audioFile).streamType(AudioManager.STREAM_VOICE_CALL).build())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<Boolean>() {
+                    .subscribe(new Consumer<Boolean>() {
                         @Override
-                        public void call(Boolean aBoolean) {
+                        public void accept(Boolean aBoolean) {
                             startPlay();
                         }
-                    }, new Action1<Throwable>() {
+                    }, new Consumer<Throwable>() {
                         @Override
-                        public void call(Throwable throwable) {
+                        public void accept(Throwable throwable) {
                             throwable.printStackTrace();
                         }
                     });

@@ -45,6 +45,7 @@ ext {
     androidCompileSdkVersion = 25
     androidBuildToolsVersion = '25.0.2'
     androidSupportSdkVersion = '25.0.1'
+    rxJava2Version = "2.0.7"
     minSdkVersion = 14
     targetSdkVersion = 25
 }
