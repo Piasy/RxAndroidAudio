@@ -28,12 +28,15 @@ import android.media.MediaPlayer;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
+
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import rx.Observable;
-import rx.Single;
-import rx.SingleSubscriber;
-import rx.functions.Action1;
+
+import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.functions.Consumer;
 
 /**
  * Created by Piasy{github.com/Piasy} on 16/2/23.
@@ -61,9 +64,10 @@ public final class RxAudioPlayer {
         }
         switch (config.mType) {
             case PlayConfig.TYPE_FILE:
-                return Single.create(new Single.OnSubscribe<Boolean>() {
+
+                return Single.create(new SingleOnSubscribe<Boolean>() {
                     @Override
-                    public void call(final SingleSubscriber<? super Boolean> singleSubscriber) {
+                    public void subscribe(SingleEmitter<Boolean> singleSubscriber) throws Exception {
                         stopPlay();
 
                         Log.d(TAG, "MediaPlayer to start play: " + config.mAudioFile.getName());
@@ -78,44 +82,46 @@ public final class RxAudioPlayer {
                             mPlayer.start();
                         } catch (IllegalArgumentException | IOException e) {
                             Log.w(TAG, "startPlay fail, IllegalArgumentException: "
-                                       + e.getMessage());
+                                    + e.getMessage());
                             stopPlay();
                             singleSubscriber.onError(e);
                         }
                     }
                 });
+
             case PlayConfig.TYPE_RES:
-                return Single.create(new Single.OnSubscribe<Boolean>() {
+                return Single.create(new SingleOnSubscribe<Boolean>() {
                     @Override
-                    public void call(final SingleSubscriber<? super Boolean> singleSubscriber) {
+                    public void subscribe(SingleEmitter<Boolean> singleEmitter) throws Exception {
                         stopPlay();
 
                         Log.d(TAG, "MediaPlayer to start play: " + config.mAudioResource);
                         mPlayer = MediaPlayer.create(config.mContext, config.mAudioResource);
                         try {
-                            setMediaPlayerListener(singleSubscriber);
+                            setMediaPlayerListener(singleEmitter);
                             mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
                             mPlayer.setLooping(config.mLooping);
                             mPlayer.start();
                         } catch (IllegalArgumentException e) {
                             Log.w(TAG, "startPlay fail, IllegalArgumentException: "
-                                       + e.getMessage());
+                                    + e.getMessage());
                             stopPlay();
-                            singleSubscriber.onError(e);
+                            singleEmitter.onError(e);
                         }
                     }
                 });
+
             case PlayConfig.TYPE_URL:
-                return Single.create(new Single.OnSubscribe<Boolean>() {
+                return Single.create(new SingleOnSubscribe<Boolean>() {
                     @Override
-                    public void call(final SingleSubscriber<? super Boolean> singleSubscriber) {
+                    public void subscribe(SingleEmitter<Boolean> singleEmitter) throws Exception {
                         stopPlay();
 
                         Log.d(TAG, "MediaPlayer to start play: " + config.mUrl);
                         mPlayer = new MediaPlayer();
                         try {
                             mPlayer.setDataSource(config.mUrl);
-                            setMediaPlayerListener(singleSubscriber);
+                            setMediaPlayerListener(singleEmitter);
                             mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
                             mPlayer.setAudioStreamType(config.mStreamType);
                             mPlayer.setLooping(config.mLooping);
@@ -123,9 +129,9 @@ public final class RxAudioPlayer {
                             mPlayer.start();
                         } catch (IllegalArgumentException | IOException e) {
                             Log.w(TAG, "startPlay fail, IllegalArgumentException: "
-                                       + e.getMessage());
+                                    + e.getMessage());
                             stopPlay();
-                            singleSubscriber.onError(e);
+                            singleEmitter.onError(e);
                         }
                     }
                 });
@@ -140,8 +146,8 @@ public final class RxAudioPlayer {
      */
     @WorkerThread
     public boolean playNonRxy(@NonNull final PlayConfig config,
-            final MediaPlayer.OnCompletionListener onCompletionListener,
-            final MediaPlayer.OnErrorListener onErrorListener) {
+                              final MediaPlayer.OnCompletionListener onCompletionListener,
+                              final MediaPlayer.OnErrorListener onErrorListener) {
         stopPlay();
 
         if (!config.isArgumentValid()) {
@@ -233,7 +239,7 @@ public final class RxAudioPlayer {
         return mPlayer;
     }
 
-    private void setMediaPlayerListener(final SingleSubscriber<? super Boolean> singleSubscriber) {
+    private void setMediaPlayerListener(final SingleEmitter<Boolean> singleSubscriber) {
         mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -242,15 +248,15 @@ public final class RxAudioPlayer {
                 // could not call stopPlay immediately, otherwise the second sound
                 // could not play, thus no complete notification
                 // TODO discover why?
-                Observable.timer(50, TimeUnit.MILLISECONDS).subscribe(new Action1<Long>() {
+                Observable.timer(50, TimeUnit.MILLISECONDS).subscribe(new Consumer<Long>() {
                     @Override
-                    public void call(Long aLong) {
+                    public void accept(Long aLong) {
                         stopPlay();
                         singleSubscriber.onSuccess(true);
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         singleSubscriber.onError(throwable);
                     }
                 });
@@ -261,7 +267,7 @@ public final class RxAudioPlayer {
             public boolean onError(MediaPlayer mp, int what, int extra) {
                 Log.d(TAG, "OnErrorListener::onError" + what + ", " + extra);
                 singleSubscriber.onError(new Throwable("Player error: " + what + ", " +
-                                                       extra));
+                        extra));
                 stopPlay();
                 return true;
             }
@@ -269,7 +275,7 @@ public final class RxAudioPlayer {
     }
 
     private void setMediaPlayerListener(final MediaPlayer.OnCompletionListener onCompletionListener,
-            final MediaPlayer.OnErrorListener onErrorListener) {
+                                        final MediaPlayer.OnErrorListener onErrorListener) {
         mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(final MediaPlayer mp) {
@@ -278,15 +284,15 @@ public final class RxAudioPlayer {
                 // could not call stopPlay immediately, otherwise the second sound
                 // could not play, thus no complete notification
                 // TODO discover why?
-                Observable.timer(50, TimeUnit.MILLISECONDS).subscribe(new Action1<Long>() {
+                Observable.timer(50, TimeUnit.MILLISECONDS).subscribe(new Consumer<Long>() {
                     @Override
-                    public void call(Long aLong) {
+                    public void accept(Long aLong) {
                         stopPlay();
                         onCompletionListener.onCompletion(mp);
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         Log.d(TAG, "OnCompletionListener::onError, " + throwable.getMessage());
                     }
                 });

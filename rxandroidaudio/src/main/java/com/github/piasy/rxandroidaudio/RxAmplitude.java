@@ -26,14 +26,16 @@ package com.github.piasy.rxandroidaudio;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
+
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import rx.Observable;
-import rx.functions.Func1;
+
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
 
 /**
  * Created by Piasy{github.com/Piasy} on 16/2/22.
- *
+ * <p>
  * Get amplitude level in Rx way, max level is 8.
  */
 public final class RxAmplitude {
@@ -57,14 +59,14 @@ public final class RxAmplitude {
     }
 
     public static Observable<Integer> from(@NonNull final AudioRecorder audioRecorder,
-            long interval) {
+                                           long interval) {
         return new RxAmplitude().start(audioRecorder, interval);
     }
 
     private Observable<Integer> start(@NonNull final AudioRecorder audioRecorder, long interval) {
-        return Observable.interval(interval, TimeUnit.MILLISECONDS).map(new Func1<Long, Integer>() {
+        return Observable.interval(interval, TimeUnit.MILLISECONDS).map(new Function<Long, Integer>() {
             @Override
-            public Integer call(Long aLong) {
+            public Integer apply(Long aLong) {
                 int amplitude;
                 try {
                     amplitude = audioRecorder.getMaxAmplitude();
