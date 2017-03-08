@@ -48,7 +48,7 @@ import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Function;
+import io.reactivex.internal.functions.Functions;
 import io.reactivex.schedulers.Schedulers;
 import java.io.File;
 import java.util.ArrayList;
@@ -250,7 +250,8 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
                             .build())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(b -> startPlay(), Throwable::printStackTrace);
+                    .subscribe(Functions.emptyConsumer(), Throwable::printStackTrace,
+                            this::startPlay);
         }
     }
 

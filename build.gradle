@@ -5,7 +5,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:2.3.0'
 
         classpath 'me.tatarka:gradle-retrolambda:3.3.0'
         classpath 'me.tatarka.retrolambda.projectlombok:lombok.ast:0.2.3.a2'
@@ -43,12 +43,12 @@ ext {
     artifactName = 'RxAndroidAudio'
     artifactDescription = 'Android Audio encapsulation library, with part Rx support.'
     artifactLabels = ['rx', 'android', 'audio']
-    releaseVersionCode = 11
-    releaseVersionName = '1.4.0'
+    releaseVersionCode = 12
+    releaseVersionName = '1.5.0'
 
     androidCompileSdkVersion = 25
     androidBuildToolsVersion = '25.0.2'
-    androidSupportSdkVersion = '25.0.1'
+    androidSupportSdkVersion = '25.2.0'
     rxJava2Version = "2.0.7"
     minSdkVersion = 14
     targetSdkVersion = 25

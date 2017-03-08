@@ -17,8 +17,8 @@ allprojects {
 }
 
 dependencies {
-    compile 'com.github.piasy:rxandroidaudio:1.4.0'
-    compile 'com.github.piasy:AudioProcessor:1.4.0'
+    compile 'com.github.piasy:rxandroidaudio:1.5.0'
+    compile 'com.github.piasy:AudioProcessor:1.5.0'
 }
 ```
 
@@ -49,14 +49,29 @@ With PlayConfig, to set audio file or audio resource, set volume, or looping:
 ```java
 mRxAudioPlayer.play(PlayConfig.file(audioFile).looping(true).build())
         .subscribeOn(Schedulers.io())
-        .subscribe(new Action1<Boolean>() {
-            @Override
-            public void call(Boolean aBoolean) {
-                // play finished
-                // NOTE: if looping, the Single will never finish, you need stop playing
-                // onDestroy, otherwise, memory leak will happen!
-            }
-        });
+        .subscribe(new Observer<Boolean>() {
+               @Override
+               public void onSubscribe(final Disposable disposable) {
+
+               }
+
+               @Override
+               public void onNext(final Boolean aBoolean) {
+                    // prepared
+               }
+
+               @Override
+               public void onError(final Throwable throwable) {
+
+               }
+
+               @Override
+               public void onComplete() {
+                    // play finished
+                    // NOTE: if looping, the Observable will never finish, you need stop playing
+                    // onDestroy, otherwise, memory leak will happen!
+               }
+           });
 ```
 
 #### Full example of PlayConfig
