@@ -67,6 +67,7 @@ public final class RxAudioPlayer {
                     try {
                         setMediaPlayerListener(emitter);
                         mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
+                        mPlayer.setAudioStreamType(config.mStreamType);
                         mPlayer.setLooping(config.mLooping);
                         emitter.onNext(true);
 
@@ -225,6 +226,7 @@ public final class RxAudioPlayer {
                 try {
                     setMediaPlayerListener(onCompletionListener, onErrorListener);
                     mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
+                    mPlayer.setAudioStreamType(config.mStreamType);
                     mPlayer.setLooping(config.mLooping);
                     mPlayer.start();
                     return true;
