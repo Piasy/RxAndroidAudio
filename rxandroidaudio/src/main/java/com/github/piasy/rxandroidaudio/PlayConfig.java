@@ -52,7 +52,7 @@ public class PlayConfig {
         mLooping = builder.mLooping;
         mLeftVolume = builder.mLeftVolume;
         mRightVolume = builder.mRightVolume;
-        mUri=builder.mUri;
+        mUri = builder.mUri;
         mUrl = builder.mUrl;
     }
 
