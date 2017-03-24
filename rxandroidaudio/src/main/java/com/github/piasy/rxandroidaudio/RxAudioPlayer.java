@@ -58,6 +58,26 @@ public final class RxAudioPlayer {
             return Observable.error(new IllegalArgumentException(""));
         }
         switch (config.mType) {
+            case PlayConfig.TYPE_URI:
+                return Observable.create(emitter -> {
+                    stopPlay();
+
+                    Log.d(TAG, "MediaPlayer to start play: " + config.mUri);
+                    mPlayer = MediaPlayer.create(config.mContext, config.mUri);
+                    try {
+                        setMediaPlayerListener(emitter);
+                        mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
+                        mPlayer.setLooping(config.mLooping);
+                        emitter.onNext(true);
+
+                        mPlayer.start();
+                    } catch (IllegalArgumentException e) {
+                        Log.w(TAG, "startPlay fail, IllegalArgumentException: "
+                            + e.getMessage());
+                        stopPlay();
+                        emitter.onError(e);
+                    }
+                });
             case PlayConfig.TYPE_FILE:
                 return Observable.create(emitter -> {
                     stopPlay();
@@ -199,6 +219,20 @@ public final class RxAudioPlayer {
             return false;
         }
         switch (config.mType) {
+            case PlayConfig.TYPE_URI:
+                Log.d(TAG, "MediaPlayer to start play: " + config.mUrl);
+                mPlayer = MediaPlayer.create(config.mContext, config.mUrl);
+                try {
+                    setMediaPlayerListener(onCompletionListener, onErrorListener);
+                    mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
+                    mPlayer.setLooping(config.mLooping);
+                    mPlayer.start();
+                    return true;
+                } catch (IllegalStateException e) {
+                    Log.w(TAG, "startPlay fail, IllegalStateException: " + e.getMessage());
+                    stopPlay();
+                    return false;
+                }
             case PlayConfig.TYPE_FILE:
                 Log.d(TAG, "MediaPlayer to start play: " + config.mAudioFile.getName());
                 mPlayer = new MediaPlayer();
