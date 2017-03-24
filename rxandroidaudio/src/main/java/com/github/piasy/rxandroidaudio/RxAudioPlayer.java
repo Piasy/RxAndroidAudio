@@ -65,7 +65,7 @@ public final class RxAudioPlayer {
                     Log.d(TAG, "MediaPlayer to start play: " + config.mUri);
                     mPlayer = new MediaPlayer();
                     try {
-                        mPlayer.setDataSource(config.mContext,config.mUri);
+                        mPlayer.setDataSource(config.mContext, config.mUri);
                         setMediaPlayerListener(emitter);
                         mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
                         mPlayer.setAudioStreamType(config.mStreamType);
@@ -226,7 +226,7 @@ public final class RxAudioPlayer {
                 Log.d(TAG, "MediaPlayer to start play: " + config.mUrl);
                 mPlayer = new MediaPlayer();
                 try {
-                    mPlayer.setDataSource(config.mContext,config.mUri);
+                    mPlayer.setDataSource(config.mContext, config.mUri);
                     setMediaPlayerListener(onCompletionListener, onErrorListener);
                     mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
                     mPlayer.setAudioStreamType(config.mStreamType);
