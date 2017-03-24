@@ -78,7 +78,7 @@ public class PlayConfig {
         return builder;
     }
 
-    public static Builder uri(Context context, Uri uri){
+    public static Builder uri(Context context, Uri uri) {
         Builder builder = new Builder();
         builder.mContext = context;
         builder.mUri = uri;
