@@ -63,12 +63,14 @@ public final class RxAudioPlayer {
                     stopPlay();
 
                     Log.d(TAG, "MediaPlayer to start play: " + config.mUri);
-                    mPlayer = MediaPlayer.create(config.mContext, config.mUri);
+                    mPlayer = new MediaPlayer();
                     try {
+                        mPlayer.setDataSource(config.mContext,config.mUri);
                         setMediaPlayerListener(emitter);
                         mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
                         mPlayer.setAudioStreamType(config.mStreamType);
                         mPlayer.setLooping(config.mLooping);
+                        mPlayer.prepare();
                         emitter.onNext(true);
 
                         mPlayer.start();
@@ -222,15 +224,17 @@ public final class RxAudioPlayer {
         switch (config.mType) {
             case PlayConfig.TYPE_URI:
                 Log.d(TAG, "MediaPlayer to start play: " + config.mUrl);
-                mPlayer = MediaPlayer.create(config.mContext, config.mUrl);
+                mPlayer = new MediaPlayer();
                 try {
+                    mPlayer.setDataSource(config.mContext,config.mUri);
                     setMediaPlayerListener(onCompletionListener, onErrorListener);
                     mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
                     mPlayer.setAudioStreamType(config.mStreamType);
                     mPlayer.setLooping(config.mLooping);
+                    mPlayer.prepare();
                     mPlayer.start();
                     return true;
-                } catch (IllegalStateException e) {
+                } catch (IllegalArgumentException | IOException e) {
                     Log.w(TAG, "startPlay fail, IllegalStateException: " + e.getMessage());
                     stopPlay();
                     return false;
