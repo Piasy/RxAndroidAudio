@@ -17,6 +17,7 @@ public class PlayConfig {
     static final int TYPE_FILE = 1;
     static final int TYPE_RES = 2;
     static final int TYPE_URL = 3;
+    static final int TYPE_URI = 4;
 
     @PlayConfig.Type
     final int mType;
@@ -25,6 +26,8 @@ public class PlayConfig {
 
     @RawRes
     final int mAudioResource;
+
+    final Uri mUri;
 
     final File mAudioFile;
 
@@ -49,6 +52,7 @@ public class PlayConfig {
         mLooping = builder.mLooping;
         mLeftVolume = builder.mLeftVolume;
         mRightVolume = builder.mRightVolume;
+        mUri = builder.mUri;
         mUrl = builder.mUrl;
     }
 
@@ -74,6 +78,14 @@ public class PlayConfig {
         return builder;
     }
 
+    public static Builder uri(Context context, Uri uri) {
+        Builder builder = new Builder();
+        builder.mContext = context;
+        builder.mUri = uri;
+        builder.mType = TYPE_URI;
+        return builder;
+    }
+
     public boolean isArgumentValid() {
         switch (mType) {
             case TYPE_FILE:
@@ -82,6 +94,8 @@ public class PlayConfig {
                 return mAudioResource > 0 && mContext != null;
             case TYPE_URL:
                 return !TextUtils.isEmpty(mUrl);
+            case TYPE_URI:
+                return mUri != null;
             default:
                 return false;
         }
@@ -101,6 +115,8 @@ public class PlayConfig {
 
         @RawRes
         int mAudioResource;
+
+        Uri mUri;
 
         File mAudioFile;
 
