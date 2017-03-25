@@ -17,8 +17,8 @@ allprojects {
 }
 
 dependencies {
-    compile 'com.github.piasy:rxandroidaudio:1.5.0'
-    compile 'com.github.piasy:AudioProcessor:1.5.0'
+    compile 'com.github.piasy:rxandroidaudio:1.5.1'
+    compile 'com.github.piasy:AudioProcessor:1.5.1'
 }
 ```
 

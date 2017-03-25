@@ -1,5 +1,9 @@
 ## Change log
 
++ v1.5.1
+  + Uri support
++ v1.5.0
+  + RxJava 2.x support
 + v1.4.0
   + Allow play from url
   + Add AudioProcessor
