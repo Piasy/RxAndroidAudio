@@ -2,6 +2,7 @@ package com.github.piasy.rxandroidaudio;
 
 import android.content.Context;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.support.annotation.FloatRange;
 import android.support.annotation.IntDef;
 import android.support.annotation.RawRes;
@@ -86,7 +87,7 @@ public class PlayConfig {
         return builder;
     }
 
-    public boolean isArgumentValid() {
+    boolean isArgumentValid() {
         switch (mType) {
             case TYPE_FILE:
                 return mAudioFile != null && mAudioFile.exists();
@@ -101,7 +102,31 @@ public class PlayConfig {
         }
     }
 
-    @IntDef(value = { TYPE_FILE, TYPE_RES, TYPE_URL })
+    boolean isLocalSource() {
+        switch (mType) {
+            case PlayConfig.TYPE_FILE:
+            case PlayConfig.TYPE_RES:
+                return true;
+            case PlayConfig.TYPE_URL:
+            case PlayConfig.TYPE_URI:
+            default:
+                return false;
+        }
+    }
+
+    boolean needPrepare() {
+        switch (mType) {
+            case PlayConfig.TYPE_FILE:
+            case PlayConfig.TYPE_URL:
+            case PlayConfig.TYPE_URI:
+                return true;
+            case PlayConfig.TYPE_RES:
+            default:
+                return false;
+        }
+    }
+
+    @IntDef(value = { TYPE_FILE, TYPE_RES, TYPE_URL, TYPE_URI })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {
     }

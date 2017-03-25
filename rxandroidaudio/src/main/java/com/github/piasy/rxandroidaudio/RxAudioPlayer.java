@@ -50,6 +50,36 @@ public final class RxAudioPlayer {
         return RxAudioPlayerHolder.INSTANCE;
     }
 
+    private MediaPlayer create(final PlayConfig config) throws IOException {
+        stopPlay();
+
+        MediaPlayer player;
+        switch (config.mType) {
+            case PlayConfig.TYPE_URI:
+                Log.d(TAG, "MediaPlayer to start play uri: " + config.mUri);
+                player = new MediaPlayer();
+                player.setDataSource(config.mContext, config.mUri);
+                return player;
+            case PlayConfig.TYPE_FILE:
+                Log.d(TAG, "MediaPlayer to start play file: " + config.mAudioFile.getName());
+                player = new MediaPlayer();
+                player.setDataSource(config.mAudioFile.getAbsolutePath());
+                return player;
+            case PlayConfig.TYPE_RES:
+                Log.d(TAG, "MediaPlayer to start play: " + config.mAudioResource);
+                player = MediaPlayer.create(config.mContext, config.mAudioResource);
+                return player;
+            case PlayConfig.TYPE_URL:
+                Log.d(TAG, "MediaPlayer to start play: " + config.mUrl);
+                player = new MediaPlayer();
+                player.setDataSource(config.mUrl);
+                return player;
+            default:
+                // can't happen, just fix checkstyle
+                throw new IllegalArgumentException("Unknown type: " + config.mType);
+        }
+    }
+
     /**
      * play audio from local file. should be scheduled in IO thread.
      */
@@ -57,148 +87,44 @@ public final class RxAudioPlayer {
         if (!config.isArgumentValid()) {
             return Observable.error(new IllegalArgumentException(""));
         }
-        switch (config.mType) {
-            case PlayConfig.TYPE_URI:
-                return Observable.create(emitter -> {
-                    stopPlay();
 
-                    Log.d(TAG, "MediaPlayer to start play: " + config.mUri);
-                    mPlayer = new MediaPlayer();
-                    try {
-                        mPlayer.setDataSource(config.mContext, config.mUri);
-                        setMediaPlayerListener(emitter);
-                        mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
-                        mPlayer.setAudioStreamType(config.mStreamType);
-                        mPlayer.setLooping(config.mLooping);
-                        mPlayer.prepare();
-                        emitter.onNext(true);
+        return Observable.<Boolean>create(emitter -> {
+            MediaPlayer player = create(config);
+            setMediaPlayerListener(player, emitter);
+            player.setVolume(config.mLeftVolume, config.mRightVolume);
+            player.setAudioStreamType(config.mStreamType);
+            player.setLooping(config.mLooping);
+            if (config.needPrepare()) {
+                player.prepare();
+            }
+            emitter.onNext(true);
 
-                        mPlayer.start();
-                    } catch (IllegalArgumentException e) {
-                        Log.w(TAG, "startPlay fail, IllegalArgumentException: "
-                            + e.getMessage());
-                        stopPlay();
-                        emitter.onError(e);
-                    }
-                });
-            case PlayConfig.TYPE_FILE:
-                return Observable.create(emitter -> {
-                    stopPlay();
-
-                    Log.d(TAG, "MediaPlayer to start play: " + config.mAudioFile.getName());
-                    mPlayer = new MediaPlayer();
-                    try {
-                        mPlayer.setDataSource(config.mAudioFile.getAbsolutePath());
-                        setMediaPlayerListener(emitter);
-                        mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
-                        mPlayer.setAudioStreamType(config.mStreamType);
-                        mPlayer.setLooping(config.mLooping);
-                        mPlayer.prepare();
-                        emitter.onNext(true);
-
-                        mPlayer.start();
-                    } catch (IllegalArgumentException | IOException e) {
-                        Log.w(TAG, "startPlay fail, IllegalArgumentException: "
-                                   + e.getMessage());
-                        stopPlay();
-                        emitter.onError(e);
-                    }
-                });
-            case PlayConfig.TYPE_RES:
-                return Observable.create(emitter -> {
-                    stopPlay();
-
-                    Log.d(TAG, "MediaPlayer to start play: " + config.mAudioResource);
-                    mPlayer = MediaPlayer.create(config.mContext, config.mAudioResource);
-                    try {
-                        setMediaPlayerListener(emitter);
-                        mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
-                        mPlayer.setLooping(config.mLooping);
-                        emitter.onNext(true);
-
-                        mPlayer.start();
-                    } catch (IllegalArgumentException e) {
-                        Log.w(TAG, "startPlay fail, IllegalArgumentException: "
-                                   + e.getMessage());
-                        stopPlay();
-                        emitter.onError(e);
-                    }
-                });
-
-            case PlayConfig.TYPE_URL:
-                return Observable.create(emitter -> {
-                    stopPlay();
-
-                    Log.d(TAG, "MediaPlayer to start play: " + config.mUrl);
-                    mPlayer = new MediaPlayer();
-                    try {
-                        mPlayer.setDataSource(config.mUrl);
-                        setMediaPlayerListener(emitter);
-                        mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
-                        mPlayer.setAudioStreamType(config.mStreamType);
-                        mPlayer.setLooping(config.mLooping);
-                        mPlayer.prepare();
-                        emitter.onNext(true);
-
-                        mPlayer.start();
-                    } catch (IllegalArgumentException | IOException e) {
-                        Log.w(TAG, "startPlay fail, IllegalArgumentException: "
-                                   + e.getMessage());
-                        stopPlay();
-                        emitter.onError(e);
-                    }
-                });
-            default:
-                // can't happen, just fix checkstyle
-                return Observable.error(new IllegalArgumentException(""));
-        }
+            player.start();
+            mPlayer = player;
+        }).doOnError(e -> stopPlay());
     }
 
     /**
      * prepare audio from local file. should be scheduled in IO thread.
      */
     public Observable<Boolean> prepare(@NonNull final PlayConfig config) {
-        if (config.mType == PlayConfig.TYPE_FILE && config.mAudioFile != null
-            && config.mAudioFile.exists()) {
-            return Observable.create(emitter -> {
-                stopPlay();
-
-                Log.d(TAG, "MediaPlayer to start play: " + config.mAudioFile.getName());
-                mPlayer = new MediaPlayer();
-                try {
-                    mPlayer.setDataSource(config.mAudioFile.getAbsolutePath());
-                    setMediaPlayerListener(emitter);
-                    mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
-                    mPlayer.setLooping(config.mLooping);
-                    mPlayer.prepare();
-                    emitter.onNext(true);
-                } catch (IllegalArgumentException | IOException e) {
-                    Log.w(TAG, "startPlay fail, IllegalArgumentException: " + e.getMessage());
-                    stopPlay();
-                    emitter.onError(e);
-                }
-            });
-        } else if (config.mType == PlayConfig.TYPE_RES && config.mAudioResource > 0
-                   && config.mContext != null) {
-            return Observable.create(emitter -> {
-                stopPlay();
-
-                Log.d(TAG, "MediaPlayer to start play: " + config.mAudioResource);
-                mPlayer = MediaPlayer.create(config.mContext, config.mAudioResource);
-                try {
-                    setMediaPlayerListener(emitter);
-                    mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
-                    mPlayer.setLooping(config.mLooping);
-                    emitter.onNext(true);
-                } catch (IllegalArgumentException e) {
-                    Log.w(TAG, "startPlay fail, IllegalArgumentException: " + e.getMessage());
-                    stopPlay();
-                    emitter.onError(e);
-                }
-            });
-        } else {
+        if (!config.isArgumentValid() || !config.isLocalSource()) {
             return Observable.error(new IllegalArgumentException(""));
         }
+
+        return Observable.<Boolean>create(emitter -> {
+            MediaPlayer player = create(config);
+            setMediaPlayerListener(player, emitter);
+            player.setVolume(config.mLeftVolume, config.mRightVolume);
+            player.setAudioStreamType(config.mStreamType);
+            player.setLooping(config.mLooping);
+            if (config.needPrepare()) {
+                player.prepare();
+            }
+            emitter.onNext(true);
+
+            mPlayer = player;
+        }).doOnError(e -> stopPlay());
     }
 
     public void pause() {
@@ -216,79 +142,27 @@ public final class RxAudioPlayer {
     public boolean playNonRxy(@NonNull final PlayConfig config,
             final MediaPlayer.OnCompletionListener onCompletionListener,
             final MediaPlayer.OnErrorListener onErrorListener) {
-        stopPlay();
-
         if (!config.isArgumentValid()) {
             return false;
         }
-        switch (config.mType) {
-            case PlayConfig.TYPE_URI:
-                Log.d(TAG, "MediaPlayer to start play: " + config.mUrl);
-                mPlayer = new MediaPlayer();
-                try {
-                    mPlayer.setDataSource(config.mContext, config.mUri);
-                    setMediaPlayerListener(onCompletionListener, onErrorListener);
-                    mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
-                    mPlayer.setAudioStreamType(config.mStreamType);
-                    mPlayer.setLooping(config.mLooping);
-                    mPlayer.prepare();
-                    mPlayer.start();
-                    return true;
-                } catch (IllegalArgumentException | IOException e) {
-                    Log.w(TAG, "startPlay fail, IllegalStateException: " + e.getMessage());
-                    stopPlay();
-                    return false;
-                }
-            case PlayConfig.TYPE_FILE:
-                Log.d(TAG, "MediaPlayer to start play: " + config.mAudioFile.getName());
-                mPlayer = new MediaPlayer();
-                try {
-                    mPlayer.setDataSource(config.mAudioFile.getAbsolutePath());
-                    setMediaPlayerListener(onCompletionListener, onErrorListener);
-                    mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
-                    mPlayer.setAudioStreamType(config.mStreamType);
-                    mPlayer.setLooping(config.mLooping);
-                    mPlayer.prepare();
-                    mPlayer.start();
-                    return true;
-                } catch (IllegalArgumentException | IOException e) {
-                    Log.w(TAG, "startPlay fail, IllegalArgumentException: " + e.getMessage());
-                    stopPlay();
-                    return false;
-                }
-            case PlayConfig.TYPE_RES:
-                Log.d(TAG, "MediaPlayer to start play: " + config.mAudioResource);
-                mPlayer = MediaPlayer.create(config.mContext, config.mAudioResource);
-                try {
-                    setMediaPlayerListener(onCompletionListener, onErrorListener);
-                    mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
-                    mPlayer.setLooping(config.mLooping);
-                    mPlayer.start();
-                    return true;
-                } catch (IllegalStateException e) {
-                    Log.w(TAG, "startPlay fail, IllegalStateException: " + e.getMessage());
-                    stopPlay();
-                    return false;
-                }
-            case PlayConfig.TYPE_URL:
-                Log.d(TAG, "MediaPlayer to start play: " + config.mUrl);
-                mPlayer = new MediaPlayer();
-                try {
-                    mPlayer.setDataSource(config.mUrl);
-                    setMediaPlayerListener(onCompletionListener, onErrorListener);
-                    mPlayer.setVolume(config.mLeftVolume, config.mRightVolume);
-                    mPlayer.setAudioStreamType(config.mStreamType);
-                    mPlayer.setLooping(config.mLooping);
-                    mPlayer.prepare();
-                    mPlayer.start();
-                    return true;
-                } catch (IllegalArgumentException | IOException e) {
-                    Log.w(TAG, "startPlay fail, IllegalArgumentException: " + e.getMessage());
-                    stopPlay();
-                    return false;
-                }
-            default:
-                return false;
+
+        try {
+            MediaPlayer player = create(config);
+            setMediaPlayerListener(player, onCompletionListener, onErrorListener);
+            player.setVolume(config.mLeftVolume, config.mRightVolume);
+            player.setAudioStreamType(config.mStreamType);
+            player.setLooping(config.mLooping);
+            if (config.needPrepare()) {
+                player.prepare();
+            }
+            player.start();
+
+            mPlayer = player;
+            return true;
+        } catch (RuntimeException | IOException e) {
+            Log.w(TAG, "startPlay fail, IllegalArgumentException: " + e.getMessage());
+            stopPlay();
+            return false;
         }
     }
 
@@ -324,8 +198,9 @@ public final class RxAudioPlayer {
         return mPlayer;
     }
 
-    private void setMediaPlayerListener(final ObservableEmitter<Boolean> emitter) {
-        mPlayer.setOnCompletionListener(mp -> {
+    private void setMediaPlayerListener(final MediaPlayer player,
+            final ObservableEmitter<Boolean> emitter) {
+        player.setOnCompletionListener(mp -> {
             Log.d(TAG, "OnCompletionListener::onCompletion");
 
             // could not call stopPlay immediately, otherwise the second sound
@@ -336,7 +211,7 @@ public final class RxAudioPlayer {
                 emitter.onComplete();
             }, emitter::onError);
         });
-        mPlayer.setOnErrorListener((mp, what, extra) -> {
+        player.setOnErrorListener((mp, what, extra) -> {
             Log.d(TAG, "OnErrorListener::onError" + what + ", " + extra);
             emitter.onError(new Throwable("Player error: " + what + ", " + extra));
             stopPlay();
@@ -344,9 +219,10 @@ public final class RxAudioPlayer {
         });
     }
 
-    private void setMediaPlayerListener(final MediaPlayer.OnCompletionListener onCompletionListener,
+    private void setMediaPlayerListener(final MediaPlayer player,
+            final MediaPlayer.OnCompletionListener onCompletionListener,
             final MediaPlayer.OnErrorListener onErrorListener) {
-        mPlayer.setOnCompletionListener(mp -> {
+        player.setOnCompletionListener(mp -> {
             Log.d(TAG, "OnCompletionListener::onCompletion");
 
             // could not call stopPlay immediately, otherwise the second sound
@@ -357,7 +233,7 @@ public final class RxAudioPlayer {
                 onCompletionListener.onCompletion(mp);
             }, throwable -> Log.d(TAG, "OnCompletionListener::onError, " + throwable.getMessage()));
         });
-        mPlayer.setOnErrorListener((mp, what, extra) -> {
+        player.setOnErrorListener((mp, what, extra) -> {
             Log.d(TAG, "OnErrorListener::onError" + what + ", " + extra);
             onErrorListener.onError(mp, what, extra);
             stopPlay();
