@@ -29,6 +29,7 @@ import android.media.AudioManager;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -255,8 +256,11 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
         }
     }
 
+    @WorkerThread
     @Override
     public void onError(int error) {
-        Toast.makeText(this, "Error code: " + error, Toast.LENGTH_SHORT).show();
+        runOnUiThread(
+                () -> Toast.makeText(FileActivity.this, "Error code: " + error, Toast.LENGTH_SHORT)
+                        .show());
     }
 }

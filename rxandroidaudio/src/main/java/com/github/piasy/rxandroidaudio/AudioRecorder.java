@@ -262,6 +262,7 @@ public final class AudioRecorder {
     }
 
     public interface OnErrorListener {
+        @WorkerThread
         void onError(@Error int error);
     }
 
