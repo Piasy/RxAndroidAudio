@@ -1,5 +1,7 @@
 ## Change log
 
++ v1.5.2
+  + Remove RetroLambda
 + v1.5.1
   + Uri support
 + v1.5.0

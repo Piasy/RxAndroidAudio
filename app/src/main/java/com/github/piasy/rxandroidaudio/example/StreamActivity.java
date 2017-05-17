@@ -24,6 +24,8 @@
 
 package com.github.piasy.rxandroidaudio.example;
 
+import android.content.Context;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
@@ -31,23 +33,19 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import com.github.piasy.audioprocessor.AudioProcessor;
 import com.github.piasy.rxandroidaudio.StreamAudioPlayer;
 import com.github.piasy.rxandroidaudio.StreamAudioRecorder;
 import com.tbruyelle.rxpermissions2.RxPermissions;
-
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import io.reactivex.Observable;
-import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -72,7 +70,6 @@ public class StreamActivity extends AppCompatActivity {
     private byte[] mBuffer;
     private boolean mIsRecording = false;
     private float mRatio = 1;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,30 +107,21 @@ public class StreamActivity extends AppCompatActivity {
             mIsRecording = false;
         } else {
             boolean isPermissionsGranted = getRxPermissions().isGranted(WRITE_EXTERNAL_STORAGE)
-                    && getRxPermissions().isGranted(RECORD_AUDIO);
+                                           && getRxPermissions().isGranted(RECORD_AUDIO);
 
             if (!isPermissionsGranted) {
                 getRxPermissions()
-                        .request(WRITE_EXTERNAL_STORAGE,
-                                RECORD_AUDIO)
-                        .subscribe(new Consumer<Boolean>() {
-                            @Override
-                            public void accept(Boolean granted) {
-                                // not record first time to request permission
-                                if (granted) {
-                                    Toast.makeText(getApplicationContext(), "Permission granted",
-                                            Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Toast.makeText(getApplicationContext(),
-                                            "Permission not granted", Toast.LENGTH_SHORT).show();
-                                }
+                        .request(WRITE_EXTERNAL_STORAGE, RECORD_AUDIO)
+                        .subscribe(granted -> {
+                            // not record first time to request permission
+                            if (granted) {
+                                Toast.makeText(getApplicationContext(), "Permission granted",
+                                        Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getApplicationContext(),
+                                        "Permission not granted", Toast.LENGTH_SHORT).show();
                             }
-                        }, new Consumer<Throwable>() {
-                            @Override
-                            public void accept(Throwable throwable) {
-                                throwable.printStackTrace();
-                            }
-                        });
+                        }, Throwable::printStackTrace);
             } else {
                 startRecord();
                 mBtnStart.setText("Stop");
@@ -145,7 +133,7 @@ public class StreamActivity extends AppCompatActivity {
     private void startRecord() {
         try {
             mOutputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
-                    File.separator + System.nanoTime() + ".stream.m4a");
+                                   File.separator + System.nanoTime() + ".stream.m4a");
             mOutputFile.createNewFile();
             mFileOutputStream = new FileOutputStream(mOutputFile);
             mStreamAudioRecorder.start(new StreamAudioRecorder.AudioDataCallback() {
@@ -162,14 +150,11 @@ public class StreamActivity extends AppCompatActivity {
 
                 @Override
                 public void onError() {
-                    mBtnStart.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getApplicationContext(), "Record fail",
-                                    Toast.LENGTH_SHORT).show();
-                            mBtnStart.setText("Start");
-                            mIsRecording = false;
-                        }
+                    mBtnStart.post(() -> {
+                        Toast.makeText(getApplicationContext(), "Record fail",
+                                Toast.LENGTH_SHORT).show();
+                        mBtnStart.setText("Start");
+                        mIsRecording = false;
                     });
                 }
             });
@@ -190,62 +175,51 @@ public class StreamActivity extends AppCompatActivity {
 
     @OnClick(R.id.mBtnPlay)
     public void play() {
+        Context context = getApplicationContext();
+        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        audioManager.setSpeakerphoneOn(true);
+
         Observable.just(mOutputFile)
                 .subscribeOn(Schedulers.io())
-                .subscribe(new Consumer<File>() {
-                    @Override
-                    public void accept(File file) {
-                        try {
-                            mStreamAudioPlayer.init();
-                            FileInputStream inputStream = new FileInputStream(file);
-                            int read;
-                            while ((read = inputStream.read(mBuffer)) > 0) {
-                                mStreamAudioPlayer.play(mBuffer, read);
-                            }
-                            inputStream.close();
-                            mStreamAudioPlayer.release();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                .subscribe(file -> {
+                    try {
+                        mStreamAudioPlayer.init();
+                        FileInputStream inputStream = new FileInputStream(file);
+                        int read;
+                        while ((read = inputStream.read(mBuffer)) > 0) {
+                            mStreamAudioPlayer.play(mBuffer, read);
                         }
+                        inputStream.close();
+                        mStreamAudioPlayer.release();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) {
-                        throwable.printStackTrace();
-                    }
-                });
+                }, Throwable::printStackTrace);
     }
 
     @OnClick(R.id.mBtnPlayChanged)
     public void playChanged() {
         Observable.just(mOutputFile)
                 .subscribeOn(Schedulers.io())
-                .subscribe(new Consumer<File>() {
-                    @Override
-                    public void accept(File file) {
-                        try {
-                            mStreamAudioPlayer.init();
-                            FileInputStream inputStream = new FileInputStream(file);
-                            int read;
-                            while ((read = inputStream.read(mBuffer)) > 0) {
-                                mStreamAudioPlayer.play(mRatio == 1
-                                                ? mBuffer
-                                                : mAudioProcessor.process(mRatio, mBuffer,
-                                        StreamAudioRecorder.DEFAULT_SAMPLE_RATE),
-                                        read);
-                            }
-                            inputStream.close();
-                            mStreamAudioPlayer.release();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                .subscribe(file -> {
+                    try {
+                        mStreamAudioPlayer.init();
+                        FileInputStream inputStream = new FileInputStream(file);
+                        int read;
+                        while ((read = inputStream.read(mBuffer)) > 0) {
+                            mStreamAudioPlayer.play(mRatio == 1
+                                            ? mBuffer
+                                            : mAudioProcessor.process(mRatio, mBuffer,
+                                                    StreamAudioRecorder.DEFAULT_SAMPLE_RATE),
+                                    read);
                         }
+                        inputStream.close();
+                        mStreamAudioPlayer.release();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) {
-                        throwable.printStackTrace();
-                    }
-                });
+                }, Throwable::printStackTrace);
     }
 
     private RxPermissions getRxPermissions() {
@@ -254,5 +228,4 @@ public class StreamActivity extends AppCompatActivity {
         }
         return mPermissions;
     }
-
 }

@@ -26,12 +26,9 @@ package com.github.piasy.rxandroidaudio;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
-
+import io.reactivex.Observable;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-
-import io.reactivex.Observable;
-import io.reactivex.functions.Function;
 
 /**
  * Created by Piasy{github.com/Piasy} on 16/2/22.
@@ -42,11 +39,11 @@ public final class RxAmplitude {
 
     static final String TAG = "RxAmplitude";
 
-    private static final int DEFAULT_AMPLITUDE_INTERVAL = 200;
-
     // on i9300, max value is 16385
     static final int AMPLITUDE_MAX_VALUE = 16385;
     static final int AMPLITUDE_MAX_LEVEL = 8;
+
+    private static final int DEFAULT_AMPLITUDE_INTERVAL = 200;
 
     final Random mRandom;
 
@@ -59,24 +56,22 @@ public final class RxAmplitude {
     }
 
     public static Observable<Integer> from(@NonNull final AudioRecorder audioRecorder,
-                                           long interval) {
+            long interval) {
         return new RxAmplitude().start(audioRecorder, interval);
     }
 
     private Observable<Integer> start(@NonNull final AudioRecorder audioRecorder, long interval) {
-        return Observable.interval(interval, TimeUnit.MILLISECONDS).map(new Function<Long, Integer>() {
-            @Override
-            public Integer apply(Long aLong) {
-                int amplitude;
-                try {
-                    amplitude = audioRecorder.getMaxAmplitude();
-                } catch (RuntimeException e) {
-                    Log.i(TAG, "getMaxAmplitude fail: " + e.getMessage());
-                    amplitude = mRandom.nextInt(AMPLITUDE_MAX_VALUE);
-                }
-                amplitude = amplitude / (AMPLITUDE_MAX_VALUE / AMPLITUDE_MAX_LEVEL);
-                return amplitude;
-            }
-        });
+        return Observable.interval(interval, TimeUnit.MILLISECONDS)
+                .map(aLong -> {
+                    int amplitude;
+                    try {
+                        amplitude = audioRecorder.getMaxAmplitude();
+                    } catch (RuntimeException e) {
+                        Log.i(TAG, "getMaxAmplitude fail: " + e.getMessage());
+                        amplitude = mRandom.nextInt(AMPLITUDE_MAX_VALUE);
+                    }
+                    amplitude = amplitude / (AMPLITUDE_MAX_VALUE / AMPLITUDE_MAX_LEVEL);
+                    return amplitude;
+                });
     }
 }
