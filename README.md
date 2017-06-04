@@ -5,6 +5,10 @@ Android Audio encapsulation library, with part Rx support.
 
 ## Usage
 
+### About lambda support
+
+This library use lambda expression, since `com.android.tools.build:gradle:2.4.0`, there is native support for lambda, so I use it instead of jack support or RetroLambda, if you have lambda issue during build, please upgrade your gradle-android into 2.4.0+, or use 1.5.1 of this library, thanks!
+
 ### Add to gradle dependency of your module build.gradle:
 
 ```gradle
