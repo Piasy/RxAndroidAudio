@@ -3,19 +3,20 @@
 buildscript {
     repositories {
         jcenter()
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.4.0-alpha7'
+        classpath 'com.android.tools.build:gradle:3.1.2'
 
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.1"
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0"
     }
-    configurations.classpath.exclude group: 'com.android.tools.external.lombok'
 }
 
 allprojects {
     repositories {
         jcenter()
+        google()
         maven { url "http://dl.bintray.com/tbruyelle/tbruyelle" }
     }
 }
@@ -43,10 +44,10 @@ ext {
     releaseVersionCode = 14
     releaseVersionName = '1.5.2'
 
-    androidCompileSdkVersion = 25
-    androidBuildToolsVersion = '25.0.2'
-    androidSupportSdkVersion = '25.3.0'
+    androidCompileSdkVersion = 27
+    androidBuildToolsVersion = '27.0.3'
+    androidSupportSdkVersion = '27.1.1'
     rxJava2Version = "2.0.7"
-    minSdkVersion = 14
-    targetSdkVersion = 25
+    androidMinSdkVersion = 14
+    androidTargetSdkVersion = 27
 }

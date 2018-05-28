@@ -25,10 +25,12 @@
 package com.github.piasy.rxandroidaudio.example;
 
 import android.content.Context;
+import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -141,6 +143,7 @@ public class StreamActivity extends AppCompatActivity {
                 public void onAudioData(byte[] data, int size) {
                     if (mFileOutputStream != null) {
                         try {
+                            Log.d("AMP", "amp " + calcAmp(data, size));
                             mFileOutputStream.write(data, 0, size);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -163,6 +166,16 @@ public class StreamActivity extends AppCompatActivity {
         }
     }
 
+    private int calcAmp(byte[] data, int size) {
+        int amplitude = 0;
+        for (int i = 0; i + 1 < size; i += 2) {
+            short value = (short) (((data[i + 1] & 0x000000FF) << 8) + (data[i + 1] & 0x000000FF));
+            amplitude += Math.abs(value);
+        }
+        amplitude /= size / 2;
+        return amplitude / 2048;
+    }
+
     private void stopRecord() {
         mStreamAudioRecorder.stop();
         try {
@@ -175,11 +188,6 @@ public class StreamActivity extends AppCompatActivity {
 
     @OnClick(R.id.mBtnPlay)
     public void play() {
-        Context context = getApplicationContext();
-        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-        audioManager.setSpeakerphoneOn(true);
-
         Observable.just(mOutputFile)
                 .subscribeOn(Schedulers.io())
                 .subscribe(file -> {

@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-apply from: "https://raw.githubusercontent.com/Piasy/BintrayUploadScript/master/bintray.gradle"
+apply from: "https://raw.githubusercontent.com/Piasy/GradleScripts/master/PRJ_NAME/gradle/bintray.gradle"
 
 
 
@@ -8,8 +8,8 @@ android {
     buildToolsVersion rootProject.ext.androidBuildToolsVersion
 
     defaultConfig {
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdkVersion rootProject.ext.androidMinSdkVersion
+        targetSdkVersion rootProject.ext.androidTargetSdkVersion
         versionCode rootProject.ext.releaseVersionCode
         versionName rootProject.ext.releaseVersionName
     }
@@ -28,6 +28,6 @@ android {
 }
 
 dependencies {
-    compile "com.android.support:support-annotations:${rootProject.ext.androidSupportSdkVersion}"
-    compile "io.reactivex.rxjava2:rxjava:${rootProject.ext.rxJava2Version}"
+    api "com.android.support:support-annotations:${rootProject.ext.androidSupportSdkVersion}"
+    api "io.reactivex.rxjava2:rxjava:${rootProject.ext.rxJava2Version}"
 }
