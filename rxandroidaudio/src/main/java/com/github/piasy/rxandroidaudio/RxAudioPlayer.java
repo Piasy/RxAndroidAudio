@@ -97,10 +97,9 @@ public final class RxAudioPlayer {
             if (config.needPrepare()) {
                 player.prepare();
             }
-            emitter.onNext(true);
-
             player.start();
             mPlayer = player;
+            emitter.onNext(true);
         }).doOnError(e -> stopPlay());
     }
 
@@ -121,9 +120,8 @@ public final class RxAudioPlayer {
             if (config.needPrepare()) {
                 player.prepare();
             }
-            emitter.onNext(true);
-
             mPlayer = player;
+            emitter.onNext(true);
         }).doOnError(e -> stopPlay());
     }
 
