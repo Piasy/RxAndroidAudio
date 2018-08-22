@@ -4,7 +4,7 @@
 
 Android Audio encapsulation library, with part Rx support.
 
-[ ![Download](https://api.bintray.com/packages/piasy/maven/RxAndroidAudio/images/download.svg) ](https://bintray.com/piasy/maven/RxAndroidAudio/_latestVersion)
+[ ![Download](https://api.bintray.com/packages/piasy/maven/RxAndroidAudio/images/download.svg) ](https://bintray.com/piasy/maven/RxAndroidAudio/_latestVersion) [![Build Status](https://travis-ci.org/Piasy/RxAndroidAudio.svg?branch=master)](https://travis-ci.org/Piasy/RxAndroidAudio)
 
 ## Usage
 
@@ -12,7 +12,7 @@ Android Audio encapsulation library, with part Rx support.
 
 This library use lambda expression, since `com.android.tools.build:gradle:2.4.0`, there is native support for lambda, so I use it instead of jack support or RetroLambda, if you have lambda issue during build, please upgrade your gradle-android into 2.4.0+, or use 1.5.1 of this library, thanks!
 
-### Add to gradle dependency of your module build.gradle:
+### Add to gradle dependency of your module build.gradle
 
 ```gradle
 allprojects {
@@ -24,14 +24,14 @@ allprojects {
 }
 
 dependencies {
-    compile 'com.github.piasy:rxandroidaudio:1.5.2'
-    compile 'com.github.piasy:AudioProcessor:1.5.2'
+    compile 'com.github.piasy:rxandroidaudio:1.5.3'
+    compile 'com.github.piasy:AudioProcessor:1.5.3'
 }
 ```
 
-### Use in code:
+### Use in code
 
-#### Record to file:
+#### Record to file
 
 ```java
 mAudioRecorder = AudioRecorder.getInstance();
@@ -51,6 +51,7 @@ bit rate is low, the sound quality will increase when you set a bigger sample ra
 bit rate, but as the sound quality improve, the recorded file size will also increase.
 
 #### Play a file
+
 With PlayConfig, to set audio file or audio resource, set volume, or looping:
 
 ```java
@@ -92,7 +93,7 @@ PlayConfig.file(audioFile) // play a local file
     .build(); // build this config and play!
 ```
 
-#### Record a stream:
+#### Record a stream
 
 ```java
 mOutputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
@@ -126,7 +127,7 @@ mStreamAudioRecorder.start(new StreamAudioRecorder.AudioDataCallback() {
 });
 ```
 
-#### Play a stream:
+#### Play a stream
 
 ```java
 Observable.just(mOutputFile).subscribeOn(Schedulers.io()).subscribe(new Action1<File>() {
@@ -148,7 +149,7 @@ Observable.just(mOutputFile).subscribeOn(Schedulers.io()).subscribe(new Action1<
 });
 ```
 
-#### Change the sound effect in stream mode:
+#### Change the sound effect in stream mode
 
 ``` java
 mStreamAudioPlayer.play(
@@ -160,5 +161,6 @@ See [full example](https://github.com/Piasy/RxAndroidAudio/tree/master/app) for 
 
 [Download demo apk](http://fir.im/RXA).
 
-## Contribution are welcome!
-+  Please follow [my code style based on SquareAndroid](https://github.com/Piasy/java-code-styles)
+## Contribution are welcome
+
++ Please follow [my code style based on SquareAndroid](https://github.com/Piasy/java-code-styles)

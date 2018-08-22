@@ -1,5 +1,7 @@
 ## Change log
 
++ v1.5.3
+  + Be able to use the media player while playing audio
 + v1.5.2
   + Remove RetroLambda
 + v1.5.1
