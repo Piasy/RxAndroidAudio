@@ -1,7 +1,5 @@
 apply plugin: 'com.android.library'
-apply from: "https://raw.githubusercontent.com/Piasy/GradleScripts/master/PRJ_NAME/gradle/bintray.gradle"
-
-
+apply from: "$rootProject.rootDir/gradle/bintray.gradle"
 
 android {
     compileSdkVersion rootProject.ext.androidCompileSdkVersion
