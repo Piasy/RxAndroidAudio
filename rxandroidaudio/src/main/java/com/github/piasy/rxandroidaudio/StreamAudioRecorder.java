@@ -27,18 +27,22 @@ package com.github.piasy.rxandroidaudio;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import androidx.annotation.NonNull;
-import androidx.annotation.WorkerThread;
 import android.util.Log;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
 
 /**
  * Created by Piasy{github.com/Piasy} on 16/2/24.
  *
  * <em>NOTE: users should only have one instance active at the same time.</em>
  */
+
+@SuppressWarnings({"WeakerAccess"})
 public final class StreamAudioRecorder {
     public static final int DEFAULT_SAMPLE_RATE = 44100;
     public static final int DEFAULT_BUFFER_SIZE = 2048;

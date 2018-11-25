@@ -47,6 +47,8 @@ import androidx.annotation.WorkerThread;
  * http://stackoverflow.com/questions/14023291/fatal-signal-11-sigsegv-at-0x00000000-code-1-phonegap
  * </em>
  */
+
+@SuppressWarnings({"unused", "WeakerAccess", "UnusedReturnValue"})
 public final class AudioRecorder {
     public static final int DEFAULT_SAMPLE_RATE = 44100;
     public static final int DEFAULT_BIT_RATE = 44100;

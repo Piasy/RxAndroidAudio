@@ -14,6 +14,8 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Created by Piasy{github.com/Piasy} on 16/4/11.
  */
+
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class PlayConfig {
     static final int TYPE_FILE = 1;
     static final int TYPE_RES = 2;
@@ -157,9 +159,6 @@ public class PlayConfig {
         @FloatRange(from = 0.0F, to = 1.0F)
         float mRightVolume = 1.0F;
 
-        /**
-         * {@link AudioManager.STREAM_VOICE_CALL} etc.
-         */
         public Builder streamType(int streamType) {
             mStreamType = streamType;
             return this;

@@ -35,6 +35,8 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * Get amplitude level in Rx way, max level is 8.
  */
+
+@SuppressWarnings({"unused", "WeakerAccess"})
 public final class RxAmplitude {
 
     static final String TAG = "RxAmplitude";

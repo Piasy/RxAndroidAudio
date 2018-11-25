@@ -36,6 +36,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by Piasy{github.com/Piasy} on 16/2/23.
  */
+
+@SuppressWarnings({"unused", "WeakerAccess"})
 public final class RxAudioPlayer {
 
     private static final String TAG = "RxAudioPlayer";
