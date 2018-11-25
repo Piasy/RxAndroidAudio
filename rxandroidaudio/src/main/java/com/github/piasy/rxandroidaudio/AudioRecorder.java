@@ -25,13 +25,15 @@
 package com.github.piasy.rxandroidaudio;
 
 import android.media.MediaRecorder;
-import androidx.annotation.IntDef;
-import androidx.annotation.WorkerThread;
 import android.util.Log;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
+import androidx.annotation.IntDef;
+import androidx.annotation.WorkerThread;
 
 /**
  * Encapsulate {@link MediaRecorder},
@@ -62,6 +64,7 @@ public final class AudioRecorder {
     private OnErrorListener mOnErrorListener;
     private long mSampleStart = 0;       // time at which latest record or play operation started
     private MediaRecorder mRecorder;
+    private boolean mStarted = false;
 
     private AudioRecorder() {
         // singleton
@@ -123,12 +126,14 @@ public final class AudioRecorder {
         // Handle RuntimeException if the recording couldn't start
         try {
             mRecorder.start();
+            mStarted = true;
         } catch (RuntimeException exception) {
             Log.w(TAG, "startRecord fail, start fail: " + exception.getMessage());
             setError(ERROR_INTERNAL);
             mRecorder.reset();
             mRecorder.release();
             mRecorder = null;
+            mStarted = false;
             return false;
         }
         mSampleStart = System.currentTimeMillis();
@@ -189,12 +194,14 @@ public final class AudioRecorder {
         // Handle RuntimeException if the recording couldn't start
         try {
             mRecorder.start();
+            mStarted = true;
         } catch (RuntimeException exception) {
             Log.w(TAG, "startRecord fail, start fail: " + exception.getMessage());
             setError(ERROR_INTERNAL);
             mRecorder.reset();
             mRecorder.release();
             mRecorder = null;
+            mStarted = false;
             return false;
         }
         mSampleStart = System.currentTimeMillis();
@@ -222,6 +229,7 @@ public final class AudioRecorder {
                     // ref: http://stackoverflow.com/a/24092524/3077508
                     Thread.sleep(STOP_AUDIO_RECORD_DELAY_MILLIS);
                     mRecorder.stop();
+                    mStarted = false;
                     length = (int) ((System.currentTimeMillis() - mSampleStart) / 1000);
                 } catch (RuntimeException e) {
                     Log.w(TAG, "stopRecord fail, stop fail(no audio data recorded): " +
@@ -254,6 +262,11 @@ public final class AudioRecorder {
         if (mOnErrorListener != null) {
             mOnErrorListener.onError(error);
         }
+    }
+
+    /* returns recorder is started or not */
+    public boolean isStarted() {
+        return mStarted;
     }
 
     @IntDef(value = { ERROR_SDCARD_ACCESS, ERROR_INTERNAL, ERROR_NOT_PREPARED })
