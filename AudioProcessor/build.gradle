@@ -3,7 +3,7 @@ apply from: "$rootProject.rootDir/gradle/bintray.gradle"
 
 android {
     compileSdkVersion rootProject.ext.androidCompileSdkVersion
-    buildToolsVersion rootProject.ext.androidBuildToolsVersion
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
         minSdkVersion rootProject.ext.androidMinSdkVersion

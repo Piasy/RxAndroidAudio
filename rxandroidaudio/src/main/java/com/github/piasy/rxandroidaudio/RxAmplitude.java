@@ -24,7 +24,7 @@
 
 package com.github.piasy.rxandroidaudio;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 import io.reactivex.Observable;
 import java.util.Random;

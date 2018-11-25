@@ -29,7 +29,7 @@ import android.media.AudioManager;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.WorkerThread;
+import androidx.annotation.WorkerThread;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -94,13 +94,13 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
         mPermissions = new RxPermissions(this);
 
         mIvVoiceIndicators = new ArrayList<>();
-        mIvVoiceIndicators.add(ButterKnife.findById(this, R.id.mIvVoiceIndicator1));
-        mIvVoiceIndicators.add(ButterKnife.findById(this, R.id.mIvVoiceIndicator2));
-        mIvVoiceIndicators.add(ButterKnife.findById(this, R.id.mIvVoiceIndicator3));
-        mIvVoiceIndicators.add(ButterKnife.findById(this, R.id.mIvVoiceIndicator4));
-        mIvVoiceIndicators.add(ButterKnife.findById(this, R.id.mIvVoiceIndicator5));
-        mIvVoiceIndicators.add(ButterKnife.findById(this, R.id.mIvVoiceIndicator6));
-        mIvVoiceIndicators.add(ButterKnife.findById(this, R.id.mIvVoiceIndicator7));
+        mIvVoiceIndicators.add((ImageView) findViewById(R.id.mIvVoiceIndicator1));
+        mIvVoiceIndicators.add((ImageView) findViewById(R.id.mIvVoiceIndicator2));
+        mIvVoiceIndicators.add((ImageView) findViewById(R.id.mIvVoiceIndicator3));
+        mIvVoiceIndicators.add((ImageView) findViewById(R.id.mIvVoiceIndicator4));
+        mIvVoiceIndicators.add((ImageView) findViewById(R.id.mIvVoiceIndicator5));
+        mIvVoiceIndicators.add((ImageView) findViewById(R.id.mIvVoiceIndicator6));
+        mIvVoiceIndicators.add((ImageView) findViewById(R.id.mIvVoiceIndicator7));
 
         mAudioRecorder = AudioRecorder.getInstance();
         mRxAudioPlayer = RxAudioPlayer.getInstance();

@@ -6,10 +6,9 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.2'
-
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0"
+        classpath "com.android.tools.build:gradle:3.2.1"
+        classpath "com.github.dcendents:android-maven-gradle-plugin:2.0"
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
     }
 }
 
@@ -44,10 +43,10 @@ ext {
     releaseVersionCode = 15
     releaseVersionName = '1.5.3'
 
-    androidCompileSdkVersion = 27
-    androidBuildToolsVersion = '27.0.3'
-    androidSupportSdkVersion = '27.1.1'
+    androidCompileSdkVersion = 28
+    androidBuildToolsVersion = '28.0.3'
+    androidSupportSdkVersion = '28.0.0'
     rxJava2Version = "2.0.7"
     androidMinSdkVersion = 14
-    androidTargetSdkVersion = 27
+    androidTargetSdkVersion = 28
 }

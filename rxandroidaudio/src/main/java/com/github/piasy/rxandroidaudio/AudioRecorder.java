@@ -25,8 +25,8 @@
 package com.github.piasy.rxandroidaudio;
 
 import android.media.MediaRecorder;
-import android.support.annotation.IntDef;
-import android.support.annotation.WorkerThread;
+import androidx.annotation.IntDef;
+import androidx.annotation.WorkerThread;
 import android.util.Log;
 import java.io.File;
 import java.io.IOException;

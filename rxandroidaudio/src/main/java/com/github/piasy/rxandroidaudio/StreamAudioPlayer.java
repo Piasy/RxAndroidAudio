@@ -27,7 +27,7 @@ package com.github.piasy.rxandroidaudio;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.support.annotation.WorkerThread;
+import androidx.annotation.WorkerThread;
 import android.util.Log;
 
 /**
