@@ -26,6 +26,6 @@ android {
 }
 
 dependencies {
-    api "androidx.annotation:annotation:1.0.0"
+    api "androidx.annotation:annotation:${rootProject.ext.androidXVersion}"
     api "io.reactivex.rxjava2:rxjava:${rootProject.ext.rxJava2Version}"
 }
