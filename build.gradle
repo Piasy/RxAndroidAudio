@@ -40,8 +40,8 @@ ext {
     artifactName = 'RxAndroidAudio'
     artifactDescription = 'Android Audio encapsulation library, with part Rx support.'
     artifactLabels = ['rx', 'android', 'audio']
-    releaseVersionCode = 15
-    releaseVersionName = '1.5.3'
+    releaseVersionCode = 16
+    releaseVersionName = '1.6.0'
 
     androidCompileSdkVersion = 28
     androidBuildToolsVersion = '28.0.3'
