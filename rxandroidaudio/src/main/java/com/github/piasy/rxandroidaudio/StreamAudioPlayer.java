@@ -27,7 +27,7 @@ package com.github.piasy.rxandroidaudio;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.support.annotation.WorkerThread;
+import androidx.annotation.WorkerThread;
 import android.util.Log;
 
 /**
@@ -35,6 +35,8 @@ import android.util.Log;
  *
  * <em>NOTE: users should only have one instance active at the same time.</em>
  */
+
+@SuppressWarnings({"unused", "WeakerAccess", "UnusedReturnValue"})
 public final class StreamAudioPlayer {
     private static final String TAG = "StreamAudioPlayer";
     public static final int DEFAULT_SAMPLE_RATE = 44100;

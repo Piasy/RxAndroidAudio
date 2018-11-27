@@ -25,8 +25,8 @@
 package com.github.piasy.rxandroidaudio;
 
 import android.media.MediaPlayer;
-import android.support.annotation.NonNull;
-import android.support.annotation.WorkerThread;
+import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
 import android.util.Log;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -36,6 +36,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by Piasy{github.com/Piasy} on 16/2/23.
  */
+
+@SuppressWarnings({"unused", "WeakerAccess"})
 public final class RxAudioPlayer {
 
     private static final String TAG = "RxAudioPlayer";

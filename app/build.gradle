@@ -26,17 +26,17 @@ android {
 }
 
 dependencies {
-    implementation "com.android.support:appcompat-v7:${rootProject.ext.androidSupportSdkVersion}"
+    implementation 'androidx.appcompat:appcompat:1.0.2'
 
     implementation project(':rxandroidaudio')
     implementation project(':AudioProcessor')
-    implementation 'com.jakewharton:butterknife:8.7.0'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.7.0'
+    implementation "com.jakewharton:butterknife:9.0.0-rc2"
+    annotationProcessor "com.jakewharton:butterknife-compiler:9.0.0-rc2"
 
-    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
     implementation 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.4@aar'
 
-    implementation 'com.trello.rxlifecycle2:rxlifecycle:2.0.1'
-    implementation 'com.trello.rxlifecycle2:rxlifecycle-android:2.0.1'
-    implementation 'com.trello.rxlifecycle2:rxlifecycle-components:2.0.1'
+    implementation 'com.trello.rxlifecycle2:rxlifecycle:2.1.0'
+    implementation 'com.trello.rxlifecycle2:rxlifecycle-android:2.1.0'
+    implementation 'com.trello.rxlifecycle2:rxlifecycle-components:2.1.0'
 }

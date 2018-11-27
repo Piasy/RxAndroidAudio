@@ -25,11 +25,11 @@
 package com.github.piasy.rxandroidaudio.example;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.media.AudioManager;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.WorkerThread;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -37,26 +37,33 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+
 import com.github.piasy.rxandroidaudio.AudioRecorder;
 import com.github.piasy.rxandroidaudio.PlayConfig;
 import com.github.piasy.rxandroidaudio.RxAmplitude;
 import com.github.piasy.rxandroidaudio.RxAudioPlayer;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.internal.functions.Functions;
-import io.reactivex.schedulers.Schedulers;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import androidx.annotation.WorkerThread;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.internal.functions.Functions;
+import io.reactivex.schedulers.Schedulers;
+
+@SuppressWarnings("unused")
+@SuppressLint("ClickableViewAccessibility")
 public class FileActivity extends RxAppCompatActivity implements AudioRecorder.OnErrorListener {
 
     public static final int MIN_AUDIO_LENGTH_SECONDS = 2;
@@ -86,6 +93,8 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
     private RxPermissions mPermissions;
     private Queue<File> mAudioFiles = new LinkedList<>();
 
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,13 +103,13 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
         mPermissions = new RxPermissions(this);
 
         mIvVoiceIndicators = new ArrayList<>();
-        mIvVoiceIndicators.add(ButterKnife.findById(this, R.id.mIvVoiceIndicator1));
-        mIvVoiceIndicators.add(ButterKnife.findById(this, R.id.mIvVoiceIndicator2));
-        mIvVoiceIndicators.add(ButterKnife.findById(this, R.id.mIvVoiceIndicator3));
-        mIvVoiceIndicators.add(ButterKnife.findById(this, R.id.mIvVoiceIndicator4));
-        mIvVoiceIndicators.add(ButterKnife.findById(this, R.id.mIvVoiceIndicator5));
-        mIvVoiceIndicators.add(ButterKnife.findById(this, R.id.mIvVoiceIndicator6));
-        mIvVoiceIndicators.add(ButterKnife.findById(this, R.id.mIvVoiceIndicator7));
+        mIvVoiceIndicators.add((ImageView) findViewById(R.id.mIvVoiceIndicator1));
+        mIvVoiceIndicators.add((ImageView) findViewById(R.id.mIvVoiceIndicator2));
+        mIvVoiceIndicators.add((ImageView) findViewById(R.id.mIvVoiceIndicator3));
+        mIvVoiceIndicators.add((ImageView) findViewById(R.id.mIvVoiceIndicator4));
+        mIvVoiceIndicators.add((ImageView) findViewById(R.id.mIvVoiceIndicator5));
+        mIvVoiceIndicators.add((ImageView) findViewById(R.id.mIvVoiceIndicator6));
+        mIvVoiceIndicators.add((ImageView) findViewById(R.id.mIvVoiceIndicator7));
 
         mAudioRecorder = AudioRecorder.getInstance();
         mRxAudioPlayer = RxAudioPlayer.getInstance();
@@ -131,6 +140,7 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
         if (mRxAudioPlayer != null) {
             mRxAudioPlayer.stopPlay();
         }
+        compositeDisposable.dispose();
     }
 
     private void press2Record() {
@@ -141,7 +151,7 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
                 = mPermissions.isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                   && mPermissions.isGranted(Manifest.permission.RECORD_AUDIO);
         if (!isPermissionsGranted) {
-            mPermissions
+            compositeDisposable.add(mPermissions
                     .request(Manifest.permission.WRITE_EXTERNAL_STORAGE,
                             Manifest.permission.RECORD_AUDIO)
                     .subscribe(granted -> {
@@ -153,7 +163,7 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
                             Toast.makeText(getApplicationContext(), "Permission not granted",
                                     Toast.LENGTH_SHORT).show();
                         }
-                    }, Throwable::printStackTrace);
+                    }, Throwable::printStackTrace));
         } else {
             recordAfterPermissionGranted();
         }
@@ -213,7 +223,7 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
             mRecordDisposable = null;
         }
 
-        Observable
+        compositeDisposable.add(Observable
                 .fromCallable(() -> {
                     int seconds = mAudioRecorder.stopRecord();
                     Log.d(TAG, "stopRecord: " + seconds);
@@ -231,7 +241,7 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
                         mTvLog.setText(mTvLog.getText() + "\n"
                                        + "audio file " + mAudioFile.getName() + " added");
                     }
-                }, Throwable::printStackTrace);
+                }, Throwable::printStackTrace));
     }
 
     private void refreshAudioAmplitudeView(int level) {
@@ -245,14 +255,14 @@ public class FileActivity extends RxAppCompatActivity implements AudioRecorder.O
         mTvLog.setText("");
         if (!mAudioFiles.isEmpty()) {
             File audioFile = mAudioFiles.poll();
-            mRxAudioPlayer.play(
+            compositeDisposable.add(mRxAudioPlayer.play(
                     PlayConfig.file(audioFile)
                             .streamType(AudioManager.STREAM_VOICE_CALL)
                             .build())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(Functions.emptyConsumer(), Throwable::printStackTrace,
-                            this::startPlay);
+                            this::startPlay));
         }
     }
 

@@ -24,7 +24,7 @@
 
 package com.github.piasy.rxandroidaudio;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 import io.reactivex.Observable;
 import java.util.Random;
@@ -35,6 +35,8 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * Get amplitude level in Rx way, max level is 8.
  */
+
+@SuppressWarnings({"unused", "WeakerAccess"})
 public final class RxAmplitude {
 
     static final String TAG = "RxAmplitude";

@@ -3,9 +3,9 @@ package com.github.piasy.rxandroidaudio;
 import android.content.Context;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.support.annotation.FloatRange;
-import android.support.annotation.IntDef;
-import android.support.annotation.RawRes;
+import androidx.annotation.FloatRange;
+import androidx.annotation.IntDef;
+import androidx.annotation.RawRes;
 import android.text.TextUtils;
 import java.io.File;
 import java.lang.annotation.Retention;
@@ -14,6 +14,8 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Created by Piasy{github.com/Piasy} on 16/4/11.
  */
+
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class PlayConfig {
     static final int TYPE_FILE = 1;
     static final int TYPE_RES = 2;
