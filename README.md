@@ -24,8 +24,8 @@ allprojects {
 }
 
 dependencies {
-    compile 'com.github.piasy:rxandroidaudio:1.6.0'
-    compile 'com.github.piasy:AudioProcessor:1.6.0'
+    implementation 'com.github.piasy:rxandroidaudio:1.6.0'
+    implementation 'com.github.piasy:AudioProcessor:1.6.0'
 }
 ```
 
