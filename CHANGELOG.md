@@ -1,5 +1,7 @@
 ## Change log
 
++ v1.7.0
+  + Migrate to MavenCentral
 + v1.6.0
   + Migrate to AndroidX
 + v1.5.3

@@ -17,15 +17,13 @@ This library use lambda expression, since `com.android.tools.build:gradle:2.4.0`
 ```gradle
 allprojects {
     repositories {
-        maven {
-            url  "http://dl.bintray.com/piasy/maven"
-        }
+        mavenCentral()
     }
 }
 
 dependencies {
-    implementation 'com.github.piasy:rxandroidaudio:1.6.0'
-    implementation 'com.github.piasy:AudioProcessor:1.6.0'
+    implementation 'com.github.piasy:rxandroidaudio:1.7.0'
+    implementation 'com.github.piasy:AudioProcessor:1.7.0'
 }
 ```
 
